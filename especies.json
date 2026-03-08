@@ -1,0 +1,169 @@
+[
+  {
+    "id": "esp_1773001357899",
+    "nombre": "Pato mexicano",
+    "cientifico": "Anas diazi",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Anas_diazi.webp",
+    "audio": "assets\\Sonidos\\Anas_diazi.mp3",
+    "posicion": "-6.63 4.08 -6.70",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773001400564",
+    "nombre": "Avetoro del Eje Neovolcánico",
+    "cientifico": "Botaurus lentiginosus",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Botaurus_lentiginosus.webp",
+    "audio": "assets\\Sonidos\\Botaurus_lentiginosus.mp3",
+    "posicion": "4.67 -1.38 4.03",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773001476206",
+    "nombre": "Búho cornudo",
+    "cientifico": "Bubo virginianus mayensis",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Bubo_virginianus_mayensis.webp",
+    "audio": "assets\\Sonidos\\Bubo_virginianus_mayensis.mp3",
+    "posicion": "3.01 4.73 -10.44",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773001522872",
+    "nombre": "Aguililla cola blanca",
+    "cientifico": "Buteo albicaudatus",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Buteo_albicaudatus.webp",
+    "audio": "assets\\Sonidos\\Buteo_albicaudatus.mp3",
+    "posicion": "-5 5.09 5.99",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773001594690",
+    "nombre": "Aguililla de Swainson",
+    "cientifico": "Buteo swainsoni",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Buteo_swainsoni.webp",
+    "audio": "assets\\Sonidos\\Buteo_swainsoni.mp3",
+    "posicion": "-6.58 0.32 5.88",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773002328784",
+    "nombre": "Halcón peregrino",
+    "cientifico": "Falco peregrinus",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Falco_peregrinus.webp",
+    "audio": "assets\\Sonidos\\Falco_peregrinus.mp3",
+    "posicion": "3 3.62 5.21",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773002386794",
+    "nombre": "Mascarita transvolcánica",
+    "cientifico": "Geothlypis speciosa",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Geothlypis_speciosa.webp",
+    "audio": "assets\\Sonidos\\Geothlypis_speciosa.mp3",
+    "posicion": "2.52 0.09 9.53",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773002438708",
+    "nombre": "Avetoro mínimo",
+    "cientifico": "Botaurus exilis",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Botaurus_exilis.webp",
+    "audio": "assets\\Sonidos\\Botaurus_exilis.mp3",
+    "posicion": "3.46 -3.28 -8.78",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773002501758",
+    "nombre": "Gorrión sabanero de San Benito",
+    "cientifico": "Passerculus sandwichensis sanctorum",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Passerculus_sandwichensis_sanctorum.webp",
+    "audio": "assets\\Sonidos\\Passerculus_sandwichensis.mp3",
+    "posicion": "3.90 -1.67 5.90",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+
+  {
+    "id": "esp_1773002779607",
+    "nombre": "Rascón real",
+    "cientifico": "Rallus elegans tenuirostris",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Rallus_elegans_tenuirostris.webp",
+    "audio": "assets\\Sonidos\\Rallus_elegans_tenuirostris.mp3",
+    "posicion": "-5.71 -0.97 10.32",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773002879266",
+    "nombre": "Rascón limícola",
+    "cientifico": "Rallus limicola",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Rallus_limicola.webp",
+    "audio": "assets\\Sonidos\\Rallus_limicola.mp3",
+    "posicion": "-2.52 -2.84 -3.45",
+    "escala": "1.5 1.5 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773003015030",
+    "nombre": "Zambullidor menor",
+    "cientifico": "Tachybaptus dominicus",
+    "grupo": "aves",
+    "imagen": "assets\\Imagenes\\Tachybaptus_dominicus.webp",
+    "audio": "assets\\Sonidos\\Tachybaptus_dominicus.mp3",
+    "posicion": "0.48 -1.02 -8.98",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773003101464",
+    "nombre": "Rana de Moctezuma",
+    "cientifico": "Lithobates montezumae",
+    "grupo": "anfibios",
+    "imagen": "assets\\Imagenes\\Lithobates_montezumae.webp",
+    "audio": "assets\\Sonidos\\Lithobates_montezumae.mp3",
+    "posicion": "-3.85 -5.35 17.05",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773003181491",
+    "nombre": "Rana de árbol plegada",
+    "cientifico": "Dryophytes plicatus",
+    "grupo": "anfibios",
+    "imagen": "assets\\Imagenes\\Dryophytes_plicatus.webp",
+    "audio": "assets\\Sonidos\\Dryophytes_plicatus.mp3",
+    "posicion": "11.16 -2.36 -8.29",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773003280454",
+    "nombre": "Víbora de cascabel",
+    "cientifico": "Crotalus transversus",
+    "grupo": "reptiles",
+    "imagen": "assets\\Imagenes\\Crotalus_transversus.webp",
+    "audio": "assets\\Sonidos\\Crotalus_transversus.mp3",
+    "posicion": "-3.97 -1.71 5.67",
+    "escala": "2 2 1",
+    "volumen": 1
+  }
+
+]
