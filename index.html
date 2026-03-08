@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Ciénegas de Lerma — Paisaje Sonoro</title>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --azul-agua:   #3eb5c8;
+      --verde-vivo:  #5cb85c;
+      --verde-oscuro:#1e4d2b;
+      --amarillo:    #f5c842;
+      --naranja:     #f0874a;
+      --crema:       #fdf6e3;
+      --blanco:      #ffffff;
+      --panel-bg:    rgba(15, 40, 20, 0.93);
+      --sombra:      0 4px 24px rgba(0,0,0,0.35);
+
+      /* Colores por grupo */
+      --color-aves:    #4db8e8;
+      --color-anfibios:#6dcf7a;
+      --color-reptiles:#e8a84d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #000;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ══════════════════════════════════════
+       PANTALLA DE INICIO
+    ══════════════════════════════════════ */
+    #inicio {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      background: radial-gradient(ellipse at 50% 30%, #0d3320 0%, #061a0e 70%);
+      overflow: hidden;
+    }
+
+    /* Burbujas decorativas de fondo */
+    .burbuja {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.07;
+      animation: flotar 6s ease-in-out infinite;
+    }
+    .burbuja:nth-child(1){ width:300px;height:300px;background:var(--azul-agua);top:-80px;left:-80px;animation-delay:0s; }
+    .burbuja:nth-child(2){ width:200px;height:200px;background:var(--verde-vivo);bottom:60px;right:-50px;animation-delay:2s; }
+    .burbuja:nth-child(3){ width:150px;height:150px;background:var(--amarillo);bottom:-40px;left:30%;animation-delay:4s; }
+
+    @keyframes flotar {
+      0%,100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-20px) scale(1.05); }
+    }
+
+    .inicio-emoji {
+      font-size: clamp(3rem, 10vw, 5rem);
+      margin-bottom: 8px;
+      animation: rebotar 2s ease-in-out infinite;
+    }
+    @keyframes rebotar {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+
+    .inicio-titulo {
+      font-family: 'Baloo 2', cursive;
+      font-size: clamp(1.8rem, 6vw, 3.2rem);
+      font-weight: 800;
+      color: var(--crema);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .inicio-titulo span {
+      color: var(--azul-agua);
+    }
+
+    .inicio-subtitulo {
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      color: rgba(253,246,227,0.65);
+      margin-bottom: 32px;
+      font-weight: 400;
+    }
+
+    .inicio-instrucciones {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .instruccion {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 90px;
+      max-width: 110px;
+    }
+
+    .instruccion-icono { font-size: 1.8rem; }
+
+    .instruccion-texto {
+      font-size: 0.72rem;
+      color: rgba(253,246,227,0.7);
+      line-height: 1.3;
+      font-weight: 600;
+    }
+
+    #btn-entrar {
+      font-family: 'Baloo 2', cursive;
+      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      font-weight: 700;
+      padding: 16px 48px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, var(--verde-vivo), var(--azul-agua));
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(62,181,200,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.5px;
+    }
+    #btn-entrar:hover { transform: scale(1.06); box-shadow: 0 8px 32px rgba(62,181,200,0.55); }
+    #btn-entrar:active { transform: scale(0.97); }
+
+    .inicio-nota {
+      margin-top: 18px;
+      font-size: 0.75rem;
+      color: rgba(253,246,227,0.35);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ══════════════════════════════════════
+       BOTÓN MEZCLADORA (flotante)
+    ══════════════════════════════════════ */
+    #btn-mezcladora {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 9000;
+      display: none;
+      background: var(--panel-bg);
+      border: 2px solid rgba(62,181,200,0.4);
+      border-radius: 50px;
+      padding: 10px 20px;
+      color: var(--crema);
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--sombra);
+      backdrop-filter: blur(10px);
+      transition: transform 0.15s, background 0.2s;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    #btn-mezcladora:hover { background: rgba(62,181,200,0.25); transform: scale(1.04); }
+
+    /* ══════════════════════════════════════
+       PANEL MEZCLADORA
+    ══════════════════════════════════════ */
+    #mezcladora {
+      position: fixed;
+      top: 70px;
+      left: 16px;
+      width: min(300px, 90vw);
+      background: var(--panel-bg);
+      border: 1px solid rgba(62,181,200,0.25);
+      border-radius: 20px;
+      z-index: 9000;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--sombra);
+      display: none;
+      overflow: hidden;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    #mezcladora::-webkit-scrollbar { width: 4px; }
+    #mezcladora::-webkit-scrollbar-thumb { background: rgba(62,181,200,0.3); border-radius: 4px; }
+
+    .mezcla-grupo {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .mezcla-grupo:last-child { border-bottom: none; }
+
+    .grupo-titulo {
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+    .grupo-aves     { background: rgba(77,184,232,0.15); color: var(--color-aves); }
+    .grupo-anfibios { background: rgba(109,207,122,0.15); color: var(--color-anfibios); }
+    .grupo-reptiles { background: rgba(232,168,77,0.15);  color: var(--color-reptiles); }
+    .grupo-ambiente { background: rgba(255,255,255,0.06); color: rgba(253,246,227,0.7); font-size: 0.8rem; }
+
+    .track {
+      margin-bottom: 12px;
+    }
+    .track:last-child { margin-bottom: 0; }
+
+    .track-fila {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .track-nombre {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--crema);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .track-pct {
+      font-size: 0.7rem;
+      color: rgba(253,246,227,0.45);
+      font-family: monospace;
+      min-width: 34px;
+      text-align: right;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      accent-color: var(--azul-agua);
+      border-radius: 3px;
+    }
+
+    /* Colores de acento por grupo */
+    .aves-slider    { accent-color: var(--color-aves); }
+    .anfibios-slider{ accent-color: var(--color-anfibios); }
+    .reptiles-slider{ accent-color: var(--color-reptiles); }
+
+    /* ══════════════════════════════════════
+       TARJETA DE ESPECIE (tooltip al tocar)
+    ══════════════════════════════════════ */
+    #tarjeta-especie {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--panel-bg);
+      border: 2px solid rgba(62,181,200,0.4);
+      border-radius: 20px;
+      padding: 14px 24px;
+      z-index: 9000;
+      pointer-events: none;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--sombra);
+      text-align: center;
+      min-width: 200px;
+      max-width: min(320px, 88vw);
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    #tarjeta-especie.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .tarjeta-grupo-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .badge-aves     { background: rgba(77,184,232,0.2);  color: var(--color-aves); }
+    .badge-anfibios { background: rgba(109,207,122,0.2); color: var(--color-anfibios); }
+    .badge-reptiles { background: rgba(232,168,77,0.2);  color: var(--color-reptiles); }
+
+    .tarjeta-nombre {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--crema);
+      margin-bottom: 2px;
+      line-height: 1.2;
+    }
+
+    .tarjeta-cientifico {
+      font-size: 0.78rem;
+      color: rgba(253,246,227,0.5);
+      font-style: italic;
+    }
+
+    /* ══════════════════════════════════════
+       BOTÓN INFO (flotante, esquina derecha)
+    ══════════════════════════════════════ */
+    #btn-info {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9000;
+      display: none;
+      background: var(--panel-bg);
+      border: 2px solid rgba(62,181,200,0.4);
+      border-radius: 50px;
+      padding: 10px 20px;
+      color: var(--crema);
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--sombra);
+      backdrop-filter: blur(10px);
+      transition: transform 0.15s, background 0.2s;
+      align-items: center;
+      gap: 8px;
+    }
+    #btn-info:hover { background: rgba(62,181,200,0.25); transform: scale(1.04); }
+
+    /* ══════════════════════════════════════
+       MODAL DE INFORMACIÓN / CRÉDITOS
+    ══════════════════════════════════════ */
+    #modal-info-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      z-index: 11000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    #modal-info-bg.abierto { display: flex; }
+
+    #modal-info {
+      background: linear-gradient(160deg, #0d2a18 0%, #061a0e 100%);
+      border: 1px solid rgba(62,181,200,0.3);
+      border-radius: 24px;
+      width: min(680px, 100%);
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+    }
+    #modal-info::-webkit-scrollbar { width: 5px; }
+    #modal-info::-webkit-scrollbar-thumb { background: rgba(62,181,200,0.3); border-radius: 5px; }
+
+    .info-header {
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid rgba(62,181,200,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      background: #0d2a18;
+      z-index: 1;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .info-header-texto h2 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--crema);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .info-header-texto p {
+      font-size: 0.8rem;
+      color: rgba(253,246,227,0.45);
+      line-height: 1.4;
+    }
+
+    #btn-cerrar-info {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1.1rem;
+      color: var(--crema);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #btn-cerrar-info:hover { background: rgba(255,255,255,0.14); }
+
+    /* Pestañas */
+    .info-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 14px 28px 0;
+      border-bottom: 1px solid rgba(62,181,200,0.12);
+      flex-wrap: wrap;
+    }
+    .info-tab {
+      padding: 8px 16px;
+      border-radius: 10px 10px 0 0;
+      border: none;
+      background: transparent;
+      color: rgba(253,246,227,0.45);
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+    .info-tab:hover { color: var(--crema); }
+    .info-tab.activa {
+      color: var(--azul-agua);
+      border-bottom: 2px solid var(--azul-agua);
+      background: rgba(62,181,200,0.07);
+    }
+
+    .info-seccion { display: none; padding: 24px 32px 28px; }
+    .info-seccion.activa { display: block; }
+
+    /* Sección Proyecto */
+    .proyecto-bloque {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .dato-fila {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      border-left: 3px solid rgba(62,181,200,0.4);
+    }
+    .dato-icono { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .dato-cuerpo { flex: 1; min-width: 0; }
+    .dato-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--azul-agua);
+      margin-bottom: 2px;
+    }
+    .dato-valor {
+      font-size: 0.85rem;
+      color: var(--crema);
+      line-height: 1.4;
+    }
+    .dato-valor a {
+      color: var(--azul-agua);
+      text-decoration: none;
+    }
+    .dato-valor a:hover { text-decoration: underline; }
+
+    /* Sección Créditos */
+    .creditos-subtitulo {
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--azul-agua);
+      margin: 18px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .creditos-subtitulo:first-child { margin-top: 0; }
+
+    .credito-item {
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      margin-bottom: 5px;
+      border-left: 2px solid rgba(109,207,122,0.35);
+    }
+    .credito-item.reptil { border-left-color: rgba(232,168,77,0.4); }
+    .credito-item.anfibio { border-left-color: rgba(109,207,122,0.4); }
+
+    .credito-especie {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--crema);
+      margin-bottom: 2px;
+    }
+    .credito-detalle {
+      font-size: 0.7rem;
+      color: rgba(253,246,227,0.45);
+      line-height: 1.5;
+    }
+    .credito-detalle a {
+      color: rgba(62,181,200,0.8);
+      text-decoration: none;
+    }
+    .credito-detalle a:hover { text-decoration: underline; }
+
+    .cc-badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(62,181,200,0.12);
+      color: var(--azul-agua);
+      font-weight: 700;
+      margin-left: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ══════════════════════════════════════
+       INDICADOR DE CARGA
+    ══════════════════════════════════════ */
+    #cargando {
+      position: fixed;
+      inset: 0;
+      background: #061a0e;
+      z-index: 9500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(62,181,200,0.2);
+      border-top-color: var(--azul-agua);
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+    }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    #barra-progreso-wrap {
+      width: min(280px, 70vw);
+      height: 6px;
+      background: rgba(62,181,200,0.15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    #barra-progreso {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--verde-vivo), var(--azul-agua));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    #cargando-detalle {
+      font-size: 0.72rem;
+      color: rgba(253,246,227,0.35);
+      font-family: monospace;
+    }
+
+    .cargando-texto {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1.1rem;
+      color: rgba(253,246,227,0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ PANTALLA DE INICIO ══ -->
+  <div id="inicio">
+    <div class="burbuja"></div>
+    <div class="burbuja"></div>
+    <div class="burbuja"></div>
+
+    <div class="inicio-emoji">🌿</div>
+    <h1 class="inicio-titulo">Ciénegas de<br><span>Lerma</span></h1>
+    <p class="inicio-subtitulo">Descubre los sonidos de la naturaleza</p>
+
+    <div class="inicio-instrucciones">
+      <div class="instruccion">
+        <span class="instruccion-icono">🖱️</span>
+        <span class="instruccion-texto">Arrastra para explorar</span>
+      </div>
+      <div class="instruccion">
+        <span class="instruccion-icono">👆</span>
+        <span class="instruccion-texto">Toca los animales</span>
+      </div>
+      <div class="instruccion">
+        <span class="instruccion-icono">🎧</span>
+        <span class="instruccion-texto">Usa audífonos</span>
+      </div>
+      <div class="instruccion">
+        <span class="instruccion-icono">🔊</span>
+        <span class="instruccion-texto">Sube el volumen</span>
+      </div>
+    </div>
+
+    <button id="btn-entrar" onclick="iniciar()">¡Entrar a la Ciénega! 🐸</button>
+    <p class="inicio-nota">🔒 Sin internet no hay sonido · Usa servidor local o GitHub Pages</p>
+    <button onclick="toggleInfo()" style="margin-top:12px;background:transparent;border:none;color:rgba(253,246,227,0.35);font-family:'Nunito',sans-serif;font-size:0.78rem;cursor:pointer;text-decoration:underline;">ℹ️ Información del proyecto y créditos</button>
+  </div>
+
+  <!-- ══ INDICADOR DE CARGA ══ -->
+  <div id="cargando">
+    <div class="spinner"></div>
+    <p class="cargando-texto">Cargando la ciénega...</p>
+    <div id="barra-progreso-wrap">
+      <div id="barra-progreso"></div>
+    </div>
+    <p id="cargando-detalle">Preparando...</p>
+  </div>
+
+  <!-- ══ BOTÓN MEZCLADORA ══ -->
+  <button id="btn-mezcladora" onclick="toggleMezcladora()">
+    🎛️ Sonidos
+  </button>
+
+  <!-- ══ BOTÓN INFO ══ -->
+  <button id="btn-info" onclick="toggleInfo()">
+    ℹ️ Acerca de
+  </button>
+
+  <!-- ══ MODAL INFORMACIÓN / CRÉDITOS ══ -->
+  <div id="modal-info-bg" onclick="cerrarInfo(event)">
+    <div id="modal-info">
+
+      <!-- Cabecera -->
+      <div class="info-header">
+        <div class="info-header-texto">
+          <h2>🌿 Ciénegas de Lerma</h2>
+          <p>Paisaje Sonoro Interactivo · Educación Ambiental</p>
+        </div>
+        <button id="btn-cerrar-info" onclick="toggleInfo()">✕</button>
+      </div>
+
+      <!-- Pestañas -->
+      <div class="info-tabs">
+        <button class="info-tab activa" onclick="cambiarTab('proyecto', this)">📋 Proyecto</button>
+        <button class="info-tab" onclick="cambiarTab('creditos', this)">📷 Créditos</button>
+        <button class="info-tab" onclick="cambiarTab('acerca', this)">👥 Sobre el autor</button>
+      </div>
+
+      <!-- ── TAB: Proyecto ── -->
+      <div id="tab-proyecto" class="info-seccion activa">
+        <div class="proyecto-bloque">
+          <div class="dato-fila">
+            <span class="dato-icono">🎯</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Descripción</div>
+              <div class="dato-valor">Recurso educativo interactivo basado en paisaje sonoro para el reconocimiento de la biodiversidad de las Ciénegas de Lerma, diseñado para estudiantes de educación primaria.</div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">📍</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Ecosistema</div>
+              <div class="dato-valor">Ciénegas de Lerma — Chignahuapan, Chimaliapan y Chiconahuapan<br>Estado de México, México</div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">🏫</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Institución</div>
+              <div class="dato-valor">Universidad Autónoma Metropolitana — Unidad Lerma<br>Licenciatura en Educación y Tecnologías Digitales</div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">📖</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Secuencia Didáctica</div>
+              <div class="dato-valor">
+                <a href="https://docs.google.com/spreadsheets/d/15KK3thi73pe3ISY9Ly5IV3sNx8pMO1LihJnikaaV4TY/edit?usp=sharing" target="_blank" id="link-secuencia">Ver secuencia didáctica →</a>
+              </div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">🎵</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Fuente de sonidos y fotografías</div>
+              <div class="dato-valor">
+                <a href="https://www.inaturalist.org" target="_blank">iNaturalist</a> — plataforma de ciencia ciudadana con licencias Creative Commons
+              </div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">🎥</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Video 360°</div>
+              <div class="dato-valor">Grabado en las Ciénegas de Lerma (Chimaliapan), Estado de México</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: Créditos ── -->
+      <div id="tab-creditos" class="info-seccion">
+
+        <div class="creditos-subtitulo">🐦 Aves</div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Pato mexicano <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Anas diazi</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Rocio Reybal · <a href="https://mexico.inaturalist.org/photos/189481162" target="_blank">iNaturalist #189481162</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) Alvaro Rojas (brújula de aves) · <a href="https://www.inaturalist.org/sounds/1671457" target="_blank">iNaturalist #1671457</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Avetoro del Eje Neovolcánico <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Botaurus lentiginosus</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Pável Pérez · <a href="https://mexico.inaturalist.org/photos/330325553" target="_blank">iNaturalist #330325553</a><span class="cc-badge">CC BY-NC 4.0</span><br>
+            🔊 Sonido: (c) annelaura · <a href="https://www.inaturalist.org/sounds/1713510" target="_blank">iNaturalist #1713510</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Búho cornudo <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Bubo virginianus mayensis</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Leonor · <a href="https://mexico.inaturalist.org/photos/215314678" target="_blank">iNaturalist #215314678</a><span class="cc-badge">CC BY-NC 4.0</span><br>
+            🔊 Sonido: (c) Parker Reed · <a href="https://www.inaturalist.org/sounds/1776694" target="_blank">iNaturalist #1776694</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Aguililla cola blanca <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Buteo albicaudatus</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Dan Vickers · <a href="https://mexico.inaturalist.org/photos/459757481" target="_blank">iNaturalist #459757481</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) Mike Stewart · <a href="https://www.inaturalist.org/sounds/1734615" target="_blank">iNaturalist #1734615</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Aguililla de Swainson <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Buteo swainsoni</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Mauricio Calderón · <a href="https://mexico.inaturalist.org/photos/187619034" target="_blank">iNaturalist #187619034</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) Hannah K. Maielua · <a href="https://www.inaturalist.org/sounds/1583048" target="_blank">iNaturalist #1583048</a><span class="cc-badge">CC BY 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Milano tijereta <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Elanoides forficatus</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Juan Cruzado Cortés · <a href="https://mexico.inaturalist.org/photos/587130481" target="_blank">iNaturalist #587130481</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) Jason L. Poston · <a href="https://www.inaturalist.org/sounds/1597498" target="_blank">iNaturalist #1597498</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Halcón peregrino <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Falco peregrinus</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) MarvalPhotography19 · <a href="https://mexico.inaturalist.org/photos/251905937" target="_blank">iNaturalist #251905937</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) Laura Mae · <a href="https://www.inaturalist.org/sounds/931498" target="_blank">iNaturalist #931498</a><span class="cc-badge">CC BY 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Mascarita del Lerma <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Geothlypis speciosa</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Nigel Voaden · <a href="https://mexico.inaturalist.org/photos/1614789" target="_blank">iNaturalist #1614789</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) Gpe Angel Vallejo · <a href="https://www.inaturalist.org/sounds/838396" target="_blank">iNaturalist #838396</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Avetoro mínimo <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Botaurus exilis</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Jose Antonio Cruz Mendoza · <a href="https://mexico.inaturalist.org/photos/347438939" target="_blank">iNaturalist #347438939</a><span class="cc-badge">CC BY-NC 4.0</span><br>
+            🔊 Sonido: (c) Reid Hardin · <a href="https://www.inaturalist.org/sounds/1025631" target="_blank">iNaturalist #1025631</a><span class="cc-badge">CC BY 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Gorrión sabanero <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Passerculus sandwichensis sanctorum</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) patrickc · <a href="https://mexico.inaturalist.org/photos/175290734" target="_blank">iNaturalist #175290734</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) the-birder · <a href="https://www.inaturalist.org/sounds/1760852" target="_blank">iNaturalist #1760852</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Rascón real <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Rallus elegans tenuirostris</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Leonardo Hernández Escudero · <a href="https://mexico.inaturalist.org/photos/139984550" target="_blank">iNaturalist #139984550</a><span class="cc-badge">CC BY-NC 4.0</span><br>
+            🔊 Sonido: (c) Leonardo Hernández Escudero · <a href="https://www.inaturalist.org/sounds/1313261" target="_blank">iNaturalist #1313261</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Rascón limícola <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Rallus limicola</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Blair Dudeck · <a href="https://mexico.inaturalist.org/photos/5518947" target="_blank">iNaturalist #77505886</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: (c) Andrea Wuenschel · <a href="https://www.inaturalist.org/sounds/1764265" target="_blank">iNaturalist #1764265</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item">
+          <div class="credito-especie">Zambullidor menor <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Tachybaptus dominicus</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Laura Gaudette · <a href="https://mexico.inaturalist.org/photos/55800535" target="_blank">iNaturalist #55800535</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: sin registro disponible
+          </div>
+        </div>
+
+        <div class="creditos-subtitulo">🐸 Anfibios</div>
+
+        <div class="credito-item anfibio">
+          <div class="credito-especie">Rana de Moctezuma <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Lithobates montezumae</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Oscar Báez · <a href="https://mexico.inaturalist.org/photos/89862129" target="_blank">iNaturalist #89862129</a><span class="cc-badge">CC BY-NC 4.0</span><br>
+            🔊 Sonido: (c) Bruno Valente · <a href="https://www.inaturalist.org/sounds/1298910" target="_blank">iNaturalist #1298910</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div class="credito-item anfibio">
+          <div class="credito-especie">Rana de árbol plegada <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Dryophytes plicatus</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Alan Rockefeller · <a href="https://mexico.inaturalist.org/photos/47895938" target="_blank">iNaturalist #47895938</a><span class="cc-badge">CC BY 4.0</span><br>
+            🔊 Sonido: sin créditos disponibles
+          </div>
+        </div>
+
+        <div class="creditos-subtitulo">🦎 Reptiles</div>
+
+        <div class="credito-item reptil">
+          <div class="credito-especie">Víbora de cascabel <em style="font-weight:400;font-size:0.72rem;color:rgba(253,246,227,0.4)">Crotalus transversus</em></div>
+          <div class="credito-detalle">
+            📷 Foto: (c) Mariana VG · <a href="https://mexico.inaturalist.org/photos/236076245" target="_blank">iNaturalist #236076245</a><span class="cc-badge">CC BY-NC 4.0</span><br>
+            🔊 Sonido: (c) Bruno Valente · <a href="https://www.inaturalist.org/sounds/1299667" target="_blank">iNaturalist #1299667</a><span class="cc-badge">CC BY-NC 4.0</span>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding:12px 14px;background:rgba(62,181,200,0.06);border-radius:10px;border:1px solid rgba(62,181,200,0.15)">
+          <p style="font-size:0.72rem;color:rgba(253,246,227,0.45);line-height:1.6">
+            Todas las fotografías y sonidos provienen de <a href="https://www.inaturalist.org" target="_blank" style="color:var(--azul-agua)">iNaturalist</a> y están sujetos a licencias Creative Commons. Los derechos pertenecen a sus respectivos autores.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── TAB: Sobre el autor ── -->
+      <div id="tab-acerca" class="info-seccion">
+        <div class="proyecto-bloque">
+          <div class="dato-fila">
+            <span class="dato-icono">✍️</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Autor</div>
+              <div class="dato-valor">Hasem Abisai Toscano Mendoza</div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">🎓</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Proyecto terminal</div>
+              <div class="dato-valor">Licenciatura en Educación y Tecnologías Digitales<br>UAM Unidad Lerma · 2026</div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">👨‍🏫</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Asesor</div>
+              <div class="dato-valor">Omar Pérez Baños</div>
+            </div>
+          </div>
+          <div class="dato-fila">
+            <span class="dato-icono">💡</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Fundamento teórico</div>
+              <div class="dato-valor">Teoría Cognitiva del Aprendizaje Multimedia (Mayer, 2001) · Ecología del Paisaje Sonoro (Schafer, 1977) · Educación Ambiental para la sostenibilidad</div>
+            </div>
+          </div>
+          <div class="dato-fila" style="border-left-color:rgba(109,207,122,0.5)">
+            <span class="dato-icono">🌿</span>
+            <div class="dato-cuerpo">
+              <div class="dato-label">Motivación</div>
+              <div class="dato-valor" style="font-style:italic;color:rgba(253,246,227,0.65);font-size:0.8rem;">"Vi una inmensidad de agua, el reflejo del sol sobre ese azul maravilloso, la vegetación verde que escondía aves que salían volando... En ese entonces no sabía que estaba pasando al lado de las Ciénegas de Lerma."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /modal-info -->
+  </div><!-- /modal-info-bg -->
+
+  <!-- ══ PANEL MEZCLADORA ══ -->
+  <div id="mezcladora">
+    <!-- Se genera dinámicamente desde JSON -->
+  </div>
+
+  <!-- ══ TARJETA DE ESPECIE ══ -->
+  <div id="tarjeta-especie">
+    <span class="tarjeta-grupo-badge badge-aves" id="tarjeta-badge">Aves</span>
+    <div class="tarjeta-nombre" id="tarjeta-nombre">—</div>
+    <div class="tarjeta-cientifico" id="tarjeta-cientifico">—</div>
+  </div>
+
+  <!-- ══ ESCENA A-FRAME ══ -->
+  <a-scene
+    id="escena"
+    vr-mode-ui="enabled: false"
+    loading-screen="enabled: false"
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false; maxCanvasWidth: 1920; maxCanvasHeight: 1080">
+
+    <a-assets id="a-assets" timeout="30000">
+      <img id="foto-360" src="assets/foto360.jpg" crossorigin="anonymous">
+      <audio id="snd-ambiente" src="assets/ambiente.mp3" preload="auto"></audio>
+    </a-assets>
+
+    <a-sky src="#foto-360" rotation="0 -90 0"></a-sky>
+
+    <a-entity id="camara" camera look-controls="touchEnabled: true; magicWindowTrackingEnabled: false">
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+  // ════════════════════════════════════════════════
+  // CONFIGURACIÓN DE GRUPOS
+  // ════════════════════════════════════════════════
+  const GRUPOS = {
+    aves:     { label:'Aves',     emoji:'🐦', clase:'grupo-aves',     badge:'badge-aves',     slider:'aves-slider'     },
+    anfibios: { label:'Anfibios', emoji:'🐸', clase:'grupo-anfibios', badge:'badge-anfibios', slider:'anfibios-slider' },
+    reptiles: { label:'Reptiles', emoji:'🦎', clase:'grupo-reptiles', badge:'badge-reptiles', slider:'reptiles-slider' }
+  };
+
+  // ════════════════════════════════════════════════
+  // ESTADO GLOBAL
+  // ════════════════════════════════════════════════
+  let especiesData  = [];
+  let mezclaVisible = false;
+  let tarjetaTimer  = null;
+
+  // Audio manejado con Web Audio API directamente
+  // (A-Frame no inicializa AudioContext con imagen estática)
+  let audioCtx      = null;
+  const nodos       = {};   // id → { source, gainNode, buffer }
+
+  // ════════════════════════════════════════════════
+  // CREAR / DESPERTAR AudioContext en gesto de usuario
+  // ════════════════════════════════════════════════
+  function _getCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  // ════════════════════════════════════════════════
+  // CARGAR Y REPRODUCIR UN AUDIO (Web Audio API)
+  // ════════════════════════════════════════════════
+  async function _cargarAudio(id, ruta, volumen, silenciado = false) {
+    try {
+      const ctx  = _getCtx();
+      const resp = await fetch(ruta);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const buf  = await resp.arrayBuffer();
+      const decoded = await ctx.decodeAudioData(buf);
+
+      const gain = ctx.createGain();
+      // Las especies arrancan silenciadas; el ambiente arranca a su volumen normal
+      gain.gain.value = silenciado ? 0 : volumen;
+      gain.connect(ctx.destination);
+
+      const src = ctx.createBufferSource();
+      src.buffer = decoded;
+      src.loop   = true;
+      src.connect(gain);
+      src.start(0);
+
+      nodos[id] = { gain, src, buffer: decoded, volumen };
+    } catch(e) {
+      console.warn('Audio no cargado:', ruta, e.message);
+    }
+  }
+
+  // Fade-in suave al activar una especie (0 → volumen guardado, 0.4 s)
+  function _activarAudio(id) {
+    const n = nodos[id];
+    if (!n) return;
+    n.gain.gain.cancelScheduledValues(audioCtx.currentTime);
+    n.gain.gain.setTargetAtTime(n.volumen, audioCtx.currentTime, 0.12);
+  }
+
+  // Fade-out suave al desactivar (volumen → 0, 0.6 s)
+  function _silenciarAudio(id) {
+    const n = nodos[id];
+    if (!n) return;
+    n.gain.gain.cancelScheduledValues(audioCtx.currentTime);
+    n.gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+  }
+
+  // ════════════════════════════════════════════════
+  // CARGA DE ESPECIES DESDE JSON
+  // ════════════════════════════════════════════════
+  async function cargarEspecies() {
+    try {
+      const r   = await fetch('especies.json');
+      const raw = await r.json();
+      especiesData = raw.map((esp, i) => ({
+        ...esp,
+        id:    'esp' + i,                              // ID simple y seguro para DOM
+        imagen: esp.imagen.replace(/\\/g, '/'),        // barras Windows → /
+        audio:  esp.audio ? esp.audio.replace(/\\/g, '/') : ''
+      }));
+    } catch {
+      especiesData = [
+        { id:'esp0', nombre:'Pato Mexicano',  cientifico:'Anas diazi',         grupo:'aves',     imagen:'assets/pato.webp',    audio:'assets/sonido_pato.mp3',    posicion:'4 1.5 -4',   escala:'2 2 1',     volumen:1 },
+        { id:'esp1', nombre:'Ajolote',        cientifico:'Ambystoma lermaense', grupo:'anfibios', imagen:'assets/ajolote.webp', audio:'assets/sonido_ajolote.mp3', posicion:'-4 -0.5 -3', escala:'1.5 1.5 1', volumen:1 }
+      ];
+    }
+  }
+
+  // ════════════════════════════════════════════════
+  // CONSTRUIR ENTIDADES VISUALES EN A-FRAME
+  // (solo imágenes — audio se maneja aparte)
+  // ════════════════════════════════════════════════
+  function construirEscena() {
+    const assets = document.getElementById('a-assets');
+    const escena = document.getElementById('escena');
+
+    especiesData.forEach(esp => {
+      // Registrar imagen como asset de A-Frame
+      const imgAsset = document.createElement('img');
+      imgAsset.id         = 'img-' + esp.id;
+      imgAsset.src        = esp.imagen;
+      imgAsset.crossOrigin = 'anonymous';
+      assets.appendChild(imgAsset);
+
+      // Plano 3D con la imagen
+      const el = document.createElement('a-image');
+      el.id = 'entidad-' + esp.id;
+      el.setAttribute('src',      '#img-' + esp.id);
+      el.setAttribute('position', esp.posicion);
+      el.setAttribute('scale',    esp.escala);
+      el.setAttribute('look-at',  '#camara');
+      el.setAttribute('opacity',  String(0.15 + parseFloat(esp.volumen) * 0.85));
+      el.setAttribute('class',    'especie-interactiva');
+      el.dataset.nombre     = esp.nombre;
+      el.dataset.cientifico = esp.cientifico || '';
+      el.dataset.grupo      = esp.grupo || 'aves';
+
+      escena.appendChild(el);
+    });
+  }
+
+  // ════════════════════════════════════════════════
+  // INICIAR TODOS LOS AUDIOS (llamado tras gesto)
+  // ════════════════════════════════════════════════
+  async function iniciarAudios() {
+    _getCtx();
+
+    // Audio ambiente
+    await _cargarAudio('ambiente', 'assets/ambiente.mp3', 0.5);
+
+    // Audios de especies en paralelo — arrancan silenciados
+    await Promise.all(
+      especiesData
+        .filter(e => e.audio)
+        .map(e => _cargarAudio(e.id, e.audio, parseFloat(e.volumen), true))
+    );
+  }
+
+  // ════════════════════════════════════════════════
+  // CONSTRUIR MEZCLADORA AGRUPADA
+  // ════════════════════════════════════════════════
+  function construirMezcladora() {
+    const panel = document.getElementById('mezcladora');
+    let html = '';
+
+    // Ambiente
+    html += `
+      <div class="mezcla-grupo">
+        <div class="grupo-titulo grupo-ambiente">🌊 Sonido Ambiente</div>
+        <div class="track">
+          <div class="track-fila">
+            <span class="track-nombre">Viento y agua</span>
+            <span class="track-pct" id="pct-ambiente">50%</span>
+          </div>
+          <input type="range" min="0" max="1" step="0.01" value="0.5"
+            oninput="ajustarGain('ambiente', this.value, 'pct-ambiente', null)">
+        </div>
+      </div>`;
+
+    // Grupos de especies
+    const gruposPresentes = [...new Set(especiesData.map(e => e.grupo))];
+    gruposPresentes.forEach(grupoId => {
+      const g    = GRUPOS[grupoId] || { label:grupoId, emoji:'🐾', clase:'grupo-ambiente', slider:'aves-slider' };
+      const esps = especiesData.filter(e => e.grupo === grupoId);
+
+      html += `<div class="mezcla-grupo"><div class="grupo-titulo ${g.clase}">${g.emoji} ${g.label}</div>`;
+      esps.forEach(esp => {
+        const pct = Math.round(parseFloat(esp.volumen) * 100);
+        html += `
+          <div class="track">
+            <div class="track-fila">
+              <span class="track-nombre">${esp.nombre}</span>
+              <span class="track-pct" id="pct-${esp.id}">${pct}%</span>
+            </div>
+            <input type="range" class="${g.slider}" min="0" max="1" step="0.01" value="${esp.volumen}"
+              oninput="ajustarGain('${esp.id}', this.value, 'pct-${esp.id}', 'entidad-${esp.id}')">
+          </div>`;
+      });
+      html += `</div>`;
+    });
+
+    panel.innerHTML = html;
+  }
+
+  // ════════════════════════════════════════════════
+  // PROGRESO DE CARGA
+  // ════════════════════════════════════════════════
+  function _setProgreso(pct, msg) {
+    const barra   = document.getElementById('barra-progreso');
+    const detalle = document.getElementById('cargando-detalle');
+    if (barra)   barra.style.width   = pct + '%';
+    if (detalle) detalle.textContent = msg;
+  }
+
+  // ════════════════════════════════════════════════
+  // PRECARGAR FOTO 360 (evita esfera gris al entrar)
+  // ════════════════════════════════════════════════
+  function _precargarFoto360() {
+    return new Promise(resolve => {
+      const img = document.getElementById('foto-360');
+      if (img.complete && img.naturalWidth > 0) { resolve(); return; }
+      img.onload  = resolve;
+      img.onerror = resolve;
+    });
+  }
+
+  // ════════════════════════════════════════════════
+  // INICIO DE LA EXPERIENCIA
+  // ════════════════════════════════════════════════
+  async function iniciar() {
+    document.getElementById('inicio').style.display   = 'none';
+    document.getElementById('cargando').style.display = 'flex';
+
+    // Paso 1: leer JSON de especies
+    _setProgreso(5, 'Leyendo especies...');
+    await cargarEspecies();
+    _setProgreso(20, 'Especies cargadas ✓');
+
+    // Paso 2: precargar foto 360 completa antes de mostrar la escena
+    _setProgreso(25, 'Cargando fotografía 360°...');
+    await _precargarFoto360();
+    _setProgreso(50, 'Fotografía lista ✓');
+
+    // Paso 3: construir escena y mezcladora
+    construirEscena();
+    construirMezcladora();
+    _setProgreso(60, 'Escena construida ✓');
+
+    // Paso 4: cargar todos los audios en paralelo
+    _setProgreso(65, 'Cargando sonidos...');
+    await iniciarAudios();
+    _setProgreso(100, '¡Listo!');
+
+    // Pequeña pausa para que el usuario vea el 100%
+    await new Promise(r => setTimeout(r, 350));
+
+    document.getElementById('cargando').style.display       = 'none';
+    document.getElementById('btn-mezcladora').style.display = 'flex';
+    document.getElementById('btn-info').style.display       = 'flex';
+    _registrarToques();
+  }
+
+  // ════════════════════════════════════════════════
+  // INTERACCIONES: HOVER (desktop) y TAP (móvil)
+  // ════════════════════════════════════════════════
+  function _registrarToques() {
+    // Rastrear qué especie está activa en móvil para el toggle
+    let especieActivaMobil = null;
+
+    document.querySelectorAll('.especie-interactiva').forEach(el => {
+      const espId = el.id.replace('entidad-', '');
+
+      // ── Desktop: hover activa/silencia ──
+      el.addEventListener('mouseenter', () => {
+        mostrarTarjeta(el);
+        _activarAudio(espId);
+      });
+      el.addEventListener('mouseleave', () => {
+        ocultarTarjeta();
+        _silenciarAudio(espId);
+      });
+
+      // ── Móvil: primer tap activa, segundo tap silencia (toggle) ──
+      el.addEventListener('click', () => {
+        if (especieActivaMobil === espId) {
+          // Segundo tap: silenciar y ocultar
+          ocultarTarjeta();
+          _silenciarAudio(espId);
+          especieActivaMobil = null;
+          clearTimeout(tarjetaTimer);
+        } else {
+          // Primer tap: silenciar la anterior si había una
+          if (especieActivaMobil) _silenciarAudio(especieActivaMobil);
+          mostrarTarjeta(el);
+          _activarAudio(espId);
+          especieActivaMobil = espId;
+          // Auto-silenciar después de 6 s si no hay interacción
+          clearTimeout(tarjetaTimer);
+          tarjetaTimer = setTimeout(() => {
+            ocultarTarjeta();
+            _silenciarAudio(espId);
+            especieActivaMobil = null;
+          }, 6000);
+        }
+      });
+    });
+
+    const cam = document.getElementById('camara');
+    cam.setAttribute('raycaster', 'objects: .especie-interactiva; recursive: false');
+    cam.setAttribute('cursor',    'rayOrigin: mouse; fuse: false');
+  }
+
+  function mostrarTarjeta(el) {
+    const grupoId = el.dataset.grupo || 'aves';
+    const g       = GRUPOS[grupoId] || GRUPOS.aves;
+    const badge   = document.getElementById('tarjeta-badge');
+    badge.textContent = g.emoji + ' ' + g.label;
+    badge.className   = 'tarjeta-grupo-badge ' + g.badge;
+    document.getElementById('tarjeta-nombre').textContent     = el.dataset.nombre || '';
+    document.getElementById('tarjeta-cientifico').textContent = el.dataset.cientifico || '';
+    document.getElementById('tarjeta-especie').classList.add('visible');
+  }
+
+  function ocultarTarjeta() {
+    document.getElementById('tarjeta-especie').classList.remove('visible');
+  }
+
+  // ════════════════════════════════════════════════
+  // CONTROL DE VOLUMEN (Web Audio API GainNode)
+  // ════════════════════════════════════════════════
+  function ajustarGain(id, valor, idPct, idImagen) {
+    valor = parseFloat(valor);
+
+    if (nodos[id]) {
+      // Guardar el volumen deseado aunque el audio esté silenciado ahora
+      nodos[id].volumen = valor;
+      // Solo aplicar el gain si es el ambiente (nunca silenciado por interacción)
+      // o si la ganancia actual ya no es 0 (especie activa en este momento)
+      const gainActual = nodos[id].gain.gain.value;
+      if (id === 'ambiente' || gainActual > 0.01) {
+        nodos[id].gain.gain.setTargetAtTime(valor, audioCtx.currentTime, 0.015);
+      }
+    }
+
+    // Porcentaje en pantalla
+    const pct = document.getElementById(idPct);
+    if (pct) pct.textContent = Math.round(valor * 100) + '%';
+
+    // Transparencia de la imagen según volumen
+    if (idImagen) {
+      const img = document.getElementById(idImagen);
+      if (img) img.setAttribute('opacity', (0.15 + valor * 0.85).toFixed(2));
+    }
+  }
+
+  // ════════════════════════════════════════════════
+  // MODAL DE INFORMACIÓN
+  // ════════════════════════════════════════════════
+  function toggleInfo() {
+    document.getElementById('modal-info-bg').classList.toggle('abierto');
+  }
+  function cerrarInfo(e) {
+    if (e.target.id === 'modal-info-bg') toggleInfo();
+  }
+  function cambiarTab(id, btn) {
+    document.querySelectorAll('.info-seccion').forEach(s => s.classList.remove('activa'));
+    document.querySelectorAll('.info-tab').forEach(t => t.classList.remove('activa'));
+    document.getElementById('tab-' + id).classList.add('activa');
+    btn.classList.add('activa');
+  }
+
+  // ════════════════════════════════════════════════
+  // MEZCLADORA DESPLEGABLE
+  // ════════════════════════════════════════════════
+  function toggleMezcladora() {
+    mezclaVisible = !mezclaVisible;
+    const panel = document.getElementById('mezcladora');
+    const btn   = document.getElementById('btn-mezcladora');
+    panel.style.display  = mezclaVisible ? 'block' : 'none';
+    btn.style.background = mezclaVisible ? 'rgba(62,181,200,0.25)' : 'var(--panel-bg)';
+  }
+
+  // Cerrar mezcladora al tocar la escena
+  document.getElementById('escena')?.addEventListener('click', () => {
+    if (mezclaVisible) toggleMezcladora();
+  });
+  </script>
+</body>
+</html>
