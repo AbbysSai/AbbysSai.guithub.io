@@ -592,9 +592,62 @@
       font-size: 1.1rem;
       color: rgba(253,246,227,0.6);
     }
+
+    /* ══════════════════════════════════════
+       ÍCONO FLOTANTE DE ESPECIE (HTML overlay)
+    ══════════════════════════════════════ */
+    .especie-pin {
+      position: absolute;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      opacity: 0;          /* se muestra cuando A-Frame proyecta la posición */
+      transition: opacity 0.4s;
+    }
+    .especie-pin.visible { opacity: 1; }
+
+    .especie-pin-emoji {
+      font-size: 1.5rem;
+      animation: pin-rebote 2s ease-in-out infinite;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7));
+    }
+    .especie-pin-label {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(0,0,0,0.55);
+      padding: 1px 6px;
+      border-radius: 10px;
+      white-space: nowrap;
+      backdrop-filter: blur(4px);
+    }
+    .especie-pin.grupo-aves     .especie-pin-label { border-left: 3px solid var(--color-aves); }
+    .especie-pin.grupo-anfibios .especie-pin-label { border-left: 3px solid var(--color-anfibios); }
+    .especie-pin.grupo-reptiles .especie-pin-label { border-left: 3px solid var(--color-reptiles); }
+
+    @keyframes pin-rebote {
+      0%, 100% { transform: translateY(0);    }
+      50%       { transform: translateY(-5px); }
+    }
+
+    /* Contenedor para los pins sobre el canvas de A-Frame */
+    #pins-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+    }
   </style>
 </head>
 <body>
+
+  <!-- ══ OVERLAY DE PINS 2D ══ -->
+  <div id="pins-overlay"></div>
 
   <!-- ══ PANTALLA DE INICIO ══ -->
   <div id="inicio">
@@ -677,7 +730,7 @@
             <span class="dato-icono">🎯</span>
             <div class="dato-cuerpo">
               <div class="dato-label">Descripción</div>
-              <div class="dato-valor">Recurso educativo interactivo basado en paisaje sonoro para el reconocimiento de la biodiversidad de las Ciénegas de Lerma, diseñado para estudiantes de educación primaria.</div>
+              <div class="dato-valor">Recurso educativo interactivo basado en paisaje sonoro para el reconocimiento de la biodiversidad de las Ciénegas del Río Lerma, diseñado para estudiantes de educación primaria.</div>
             </div>
           </div>
           <div class="dato-fila">
@@ -699,7 +752,8 @@
             <div class="dato-cuerpo">
               <div class="dato-label">Secuencia Didáctica</div>
               <div class="dato-valor">
-                <a href="https://docs.google.com/spreadsheets/d/15KK3thi73pe3ISY9Ly5IV3sNx8pMO1LihJnikaaV4TY/edit?usp=sharing" target="_blank" id="link-secuencia">Ver secuencia didáctica →</a>
+                <a href="#" target="_blank" id="link-secuencia">Ver secuencia didáctica →</a>
+                <br><span style="font-size:0.72rem;color:rgba(253,246,227,0.35)">(Agrega aquí el enlace al documento)</span>
               </div>
             </div>
           </div>
@@ -716,7 +770,7 @@
             <span class="dato-icono">🎥</span>
             <div class="dato-cuerpo">
               <div class="dato-label">Video 360°</div>
-              <div class="dato-valor">Grabado en las Ciénegas de Lerma (Chimaliapan), Estado de México</div>
+              <div class="dato-valor">Grabado en las Ciénegas de Lerma, Estado de México</div>
             </div>
           </div>
         </div>
@@ -880,7 +934,7 @@
             <span class="dato-icono">🎓</span>
             <div class="dato-cuerpo">
               <div class="dato-label">Proyecto terminal</div>
-              <div class="dato-valor">Licenciatura en Educación y Tecnologías Digitales<br>UAM Unidad Lerma · 2026</div>
+              <div class="dato-valor">Licenciatura en Educación y Tecnologías Digitales<br>UAM Unidad Lerma · 2025</div>
             </div>
           </div>
           <div class="dato-fila">
@@ -1042,18 +1096,37 @@
   // (solo imágenes — audio se maneja aparte)
   // ════════════════════════════════════════════════
   function construirEscena() {
-    const assets = document.getElementById('a-assets');
-    const escena = document.getElementById('escena');
+    const assets  = document.getElementById('a-assets');
+    const escena  = document.getElementById('escena');
+    const overlay = document.getElementById('pins-overlay');
 
     especiesData.forEach(esp => {
-      // Registrar imagen como asset de A-Frame
+      const grupo = esp.grupo || 'aves';
+      const g     = GRUPOS[grupo] || GRUPOS.aves;
+
+      // ── Asset imagen ──
       const imgAsset = document.createElement('img');
-      imgAsset.id         = 'img-' + esp.id;
-      imgAsset.src        = esp.imagen;
+      imgAsset.id          = 'img-' + esp.id;
+      imgAsset.src         = esp.imagen;
       imgAsset.crossOrigin = 'anonymous';
       assets.appendChild(imgAsset);
 
-      // Plano 3D con la imagen
+      // ── Halo en el suelo (plano horizontal debajo de la especie) ──
+      const [px, py, pz] = esp.posicion.split(' ').map(parseFloat);
+      const colorHalo = { aves:'#4db8e8', anfibios:'#6dcf7a', reptiles:'#e8a84d' }[grupo] || '#4db8e8';
+
+      const halo = document.createElement('a-circle');
+      halo.setAttribute('position', `${px} ${py - 1.2} ${pz}`);
+      halo.setAttribute('radius',   '0.6');
+      halo.setAttribute('rotation', '-90 0 0');
+      halo.setAttribute('color',    colorHalo);
+      halo.setAttribute('opacity',  '0.25');
+      halo.setAttribute('animation',
+        'property: scale; from: 1 1 1; to: 1.4 1.4 1.4; dur: 1800; ' +
+        'easing: easeInOutSine; loop: true; dir: alternate');
+      escena.appendChild(halo);
+
+      // ── Imagen de la especie ──
       const el = document.createElement('a-image');
       el.id = 'entidad-' + esp.id;
       el.setAttribute('src',      '#img-' + esp.id);
@@ -1064,9 +1137,59 @@
       el.setAttribute('class',    'especie-interactiva');
       el.dataset.nombre     = esp.nombre;
       el.dataset.cientifico = esp.cientifico || '';
-      el.dataset.grupo      = esp.grupo || 'aves';
-
+      el.dataset.grupo      = grupo;
       escena.appendChild(el);
+
+      // ── Pin HTML 2D flotante ──
+      const pin = document.createElement('div');
+      pin.id        = 'pin-' + esp.id;
+      pin.className = `especie-pin grupo-${grupo}`;
+      pin.innerHTML = `
+        <span class="especie-pin-emoji">${g.emoji}</span>
+        <span class="especie-pin-label">${esp.nombre}</span>`;
+      overlay.appendChild(pin);
+    });
+
+    // Actualizar posición de los pins en cada frame
+    escena.addEventListener('renderstart', () => {
+      const camera   = document.getElementById('camara');
+      const renderer = escena.renderer;
+      const scene3d  = escena.object3D;
+
+      escena.addEventListener('tick', () => {
+        if (!camera || !renderer) return;
+        const w = renderer.domElement.clientWidth;
+        const h = renderer.domElement.clientHeight;
+        const cam3d = camera.getObject3D('camera');
+        if (!cam3d) return;
+
+        especiesData.forEach(esp => {
+          const entidad = document.getElementById('entidad-' + esp.id);
+          const pin     = document.getElementById('pin-' + esp.id);
+          if (!entidad || !pin) return;
+
+          // Proyectar posición 3D → pantalla 2D
+          const pos3d = new THREE.Vector3();
+          entidad.object3D.getWorldPosition(pos3d);
+          pos3d.project(cam3d);
+
+          // Está detrás de la cámara → ocultar
+          if (pos3d.z > 1) { pin.classList.remove('visible'); return; }
+
+          const x = (pos3d.x *  0.5 + 0.5) * w;
+          const y = (pos3d.y * -0.5 + 0.5) * h;
+
+          // Ocultar si está muy al borde de la pantalla
+          const margen = 60;
+          if (x < margen || x > w - margen || y < margen || y > h - margen) {
+            pin.classList.remove('visible'); return;
+          }
+
+          pin.style.left = x + 'px';
+          pin.style.top  = (y - 55) + 'px';   // ligeramente encima de la especie
+          pin.classList.add('visible');
+        });
+      });
     });
   }
 

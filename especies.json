@@ -17,7 +17,7 @@
     "grupo": "aves",
     "imagen": "assets\\Imagenes\\Botaurus_lentiginosus.webp",
     "audio": "assets\\Sonidos\\Botaurus_lentiginosus.mp3",
-    "posicion": "4.67 -1.38 4.03",
+    "posicion": "6 -2 4.03",
     "escala": "2 2 1",
     "volumen": 1
   },
@@ -133,13 +133,24 @@
     "volumen": 1
   },
   {
-    "id": "esp_1773003101464",
+    "id": "esp_1773172296886",
+    "nombre": "Víbora de cascabel",
+    "cientifico": "Crotalus transversus",
+    "grupo": "reptiles",
+    "imagen": "assets\\Imagenes\\Crotalus_transversus.webp",
+    "audio": "assets\\Sonidos\\Crotalus_transversus.mp3",
+    "posicion": "1.96 -1.67 -1.88",
+    "escala": "2 2 1",
+    "volumen": 1
+  },
+  {
+    "id": "esp_1773172382312",
     "nombre": "Rana de Moctezuma",
     "cientifico": "Lithobates montezumae",
     "grupo": "anfibios",
     "imagen": "assets\\Imagenes\\Lithobates_montezumae.webp",
     "audio": "assets\\Sonidos\\Lithobates_montezumae.mp3",
-    "posicion": "-3.85 -5.35 17.05",
+    "posicion": "8.52 -1.95 -22.64",
     "escala": "2 2 1",
     "volumen": 1
   },
@@ -153,17 +164,5 @@
     "posicion": "11.16 -2.36 -8.29",
     "escala": "2 2 1",
     "volumen": 1
-  },
-  {
-    "id": "esp_1773003280454",
-    "nombre": "Víbora de cascabel",
-    "cientifico": "Crotalus transversus",
-    "grupo": "reptiles",
-    "imagen": "assets\\Imagenes\\Crotalus_transversus.webp",
-    "audio": "assets\\Sonidos\\Crotalus_transversus.mp3",
-    "posicion": "-3.97 -1.71 5.67",
-    "escala": "2 2 1",
-    "volumen": 1
   }
-
 ]

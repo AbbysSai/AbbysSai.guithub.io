@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Especies — Ciénegas de Lerma</title>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --verde: #4a9e8e;
+      --oscuro: #0a1a10;
+      --panel: rgba(10,22,15,0.97);
+      --crema: #f0e8d5;
+      --arena: #c9a96e;
+      --rojo: #e05c5c;
+      --azul: #4db8e8;
+      --amarillo: #f5c842;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--oscuro);
+      color: var(--crema);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOPBAR ── */
+    #topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--panel);
+      border-bottom: 1px solid rgba(74,158,142,0.3);
+      z-index: 9999;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    #topbar h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      color: var(--verde);
+      white-space: nowrap;
+    }
+
+    .sep { width: 1px; height: 22px; background: rgba(74,158,142,0.3); flex-shrink: 0; }
+
+    .btn {
+      padding: 6px 14px; border-radius: 20px; border: 1px solid var(--verde);
+      background: transparent; color: var(--crema); font-family: 'Nunito', sans-serif;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      transition: background 0.15s, color 0.15s; white-space: nowrap;
+    }
+    .btn:hover { background: var(--verde); color: var(--oscuro); }
+    .btn.rojo { border-color: var(--rojo); }
+    .btn.rojo:hover { background: var(--rojo); color: #fff; }
+    .btn.solido { background: var(--verde); color: var(--oscuro); }
+    .btn.solido:hover { background: #3d8a7c; }
+
+    #input-video {
+      font-size: 0.75rem; padding: 5px 10px; border-radius: 8px;
+      border: 1px solid rgba(74,158,142,0.4); background: rgba(74,158,142,0.1);
+      color: var(--crema); width: 200px;
+    }
+
+    #modo-badge {
+      padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+      background: rgba(74,158,142,0.15); color: var(--verde);
+      border: 1px solid rgba(74,158,142,0.35); white-space: nowrap;
+      transition: all 0.2s;
+    }
+    #modo-badge.drag { background: rgba(245,200,66,0.15); color: var(--amarillo); border-color: rgba(245,200,66,0.35); }
+
+    /* ── MAIN ── */
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── LISTA IZQUIERDA ── */
+    #panel-lista {
+      width: 220px; background: var(--panel);
+      border-right: 1px solid rgba(74,158,142,0.2);
+      display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+    }
+    .panel-hdr {
+      padding: 12px 14px 8px;
+      border-bottom: 1px solid rgba(74,158,142,0.15);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--verde);
+    }
+    #lista { flex: 1; overflow-y: auto; padding: 6px; }
+    #lista::-webkit-scrollbar { width: 3px; }
+    #lista::-webkit-scrollbar-thumb { background: rgba(74,158,142,0.35); border-radius: 3px; }
+
+    .item {
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      border-radius: 10px; cursor: pointer; margin-bottom: 3px;
+      border: 2px solid transparent; transition: background 0.12s;
+    }
+    .item:hover { background: rgba(74,158,142,0.1); }
+    .item.activo { background: rgba(74,158,142,0.15); border-color: rgba(74,158,142,0.45); }
+
+    .item-thumb {
+      width: 34px; height: 34px; border-radius: 8px;
+      object-fit: contain; background: rgba(255,255,255,0.04); flex-shrink: 0;
+    }
+    .item-info { flex: 1; min-width: 0; }
+    .item-nom { font-size: 0.76rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-cient { font-size: 0.62rem; color: rgba(240,232,213,0.4); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Dot de color por grupo */
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-aves     { background: #4db8e8; }
+    .dot-anfibios { background: #6dcf7a; }
+    .dot-reptiles { background: #e8a84d; }
+
+    /* ── ESCENA ── */
+    #escena-wrapper {
+      flex: 1; position: relative; overflow: hidden;
+      cursor: default;
+    }
+    #escena-wrapper.modo-drag { cursor: crosshair; }
+    #escena-wrapper.arrastrando { cursor: grabbing !important; }
+    a-scene { width: 100% !important; height: 100% !important; }
+
+    #hint {
+      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      background: rgba(10,22,15,0.88); border: 1px solid rgba(74,158,142,0.3);
+      border-radius: 20px; padding: 7px 18px; font-size: 0.72rem;
+      color: rgba(240,232,213,0.8); pointer-events: none; white-space: nowrap;
+      backdrop-filter: blur(6px); z-index: 100;
+    }
+    #hint kbd {
+      background: rgba(74,158,142,0.25); padding: 1px 6px;
+      border-radius: 4px; font-family: monospace; font-size: 0.7rem;
+    }
+
+    #coords {
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      background: rgba(10,22,15,0.88); border: 1px solid rgba(74,158,142,0.2);
+      border-radius: 20px; padding: 5px 14px; font-size: 0.7rem;
+      color: var(--verde); pointer-events: none; font-family: monospace;
+      backdrop-filter: blur(6px); display: none; z-index: 100;
+    }
+
+    /* ── PANEL PROPS ── */
+    #panel-props {
+      width: 230px; background: var(--panel);
+      border-left: 1px solid rgba(74,158,142,0.2);
+      display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+    }
+    #props-body { padding: 12px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    #props-body::-webkit-scrollbar { width: 3px; }
+    #props-body::-webkit-scrollbar-thumb { background: rgba(74,158,142,0.3); border-radius: 3px; }
+
+    #props-vacio { text-align: center; font-size: 0.76rem; color: rgba(240,232,213,0.28); margin-top: 28px; line-height: 1.9; }
+
+    .prop label { display: block; font-size: 0.64rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--verde); margin-bottom: 5px; }
+    .prop input[type=text], .prop input[type=number], .prop select {
+      width: 100%; padding: 7px 9px; border-radius: 8px;
+      border: 1px solid rgba(74,158,142,0.28); background: rgba(74,158,142,0.07);
+      color: var(--crema); font-family: 'Nunito', sans-serif; font-size: 0.8rem;
+    }
+    .prop input:focus, .prop select:focus { outline: none; border-color: var(--verde); }
+    .prop select option { background: #0a1a10; }
+
+    .xyz { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+    .xyz-item label { font-size: 0.6rem; color: var(--arena); margin-bottom: 3px; }
+    .xyz-item input { text-align: center; padding: 5px 4px; }
+
+    .range-fila { display: flex; align-items: center; gap: 7px; }
+    .range-fila input[type=range] { flex: 1; accent-color: var(--verde); cursor: pointer; }
+    .range-val { font-size: 0.7rem; color: rgba(240,232,213,0.5); min-width: 30px; text-align: right; }
+
+    /* ── MODALES ── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      z-index: 20000; justify-content: center; align-items: center;
+    }
+    .modal-bg.vis { display: flex; }
+    .modal-box {
+      background: #0f2018; border: 1px solid rgba(74,158,142,0.4); border-radius: 16px;
+      padding: 26px; width: 360px; max-width: 95vw; display: flex; flex-direction: column; gap: 14px;
+    }
+    .modal-box h2 { font-family: 'Baloo 2', cursive; font-size: 1.1rem; color: var(--verde); }
+    .campo label { display: block; font-size: 0.68rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--verde); margin-bottom: 5px; }
+    .campo input, .campo select {
+      width: 100%; padding: 8px 11px; border-radius: 8px;
+      border: 1px solid rgba(74,158,142,0.3); background: rgba(74,158,142,0.08);
+      color: var(--crema); font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+    }
+    .campo input:focus, .campo select:focus { outline: none; border-color: var(--verde); }
+    .campo select option { background: #0a1a10; }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+
+    /* JSON box */
+    #json-grande { background: #0a1a10; border: 1px solid rgba(74,158,142,0.4); border-radius: 16px; padding: 22px; width: 640px; max-width: 95vw; max-height: 85vh; display: flex; flex-direction: column; gap: 12px; }
+    #json-grande h2 { font-family: 'Baloo 2', cursive; font-size: 1rem; color: var(--verde); }
+    #json-txt { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(74,158,142,0.2); border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 0.74rem; color: #7ec8b8; overflow-y: auto; white-space: pre; max-height: 48vh; resize: none; }
+    .json-btns { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+    #copy-ok { font-size: 0.74rem; color: var(--verde); opacity: 0; transition: opacity 0.3s; }
+    #copy-ok.vis { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <h1>🌿 Editor de Especies</h1>
+  <div class="sep"></div>
+  <span style="font-size:0.72rem;color:rgba(240,232,213,0.45)">Foto 360°:</span>
+  <input id="input-foto" type="text" placeholder="assets/foto360.jpg" oninput="cambiarFoto(this.value)">
+  <div class="sep"></div>
+  <span id="modo-badge">🎥 Cámara</span>
+  <div class="sep"></div>
+  <button class="btn solido" onclick="abrirAgregar()">+ Agregar especie</button>
+  <button class="btn" onclick="exportar()">⬇ Exportar JSON</button>
+  <button class="btn rojo" onclick="limpiar()">🗑 Limpiar</button>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- Lista izquierda -->
+  <div id="panel-lista">
+    <div class="panel-hdr">Especies (<span id="count">0</span>)</div>
+    <div id="lista">
+      <div style="text-align:center;padding:22px 10px;font-size:0.74rem;color:rgba(240,232,213,0.28);line-height:1.9">
+        Agrega tu primera especie
+      </div>
+    </div>
+  </div>
+
+  <!-- Escena -->
+  <div id="escena-wrapper">
+    <div id="hint">Selecciona especie → mantén <kbd>D</kbd> y arrastra · Scroll = altura</div>
+    <div id="coords">x: 0.00 · y: 0.00 · z: 0.00</div>
+
+    <a-scene vr-mode-ui="enabled: false"
+             loading-screen="dotsColor: #4a9e8e; backgroundColor: #0a1a10"
+             id="escena">
+      <a-assets id="a-assets">
+        <img id="foto-ed" src="assets/foto360.jpg" crossorigin="anonymous">
+      </a-assets>
+      <a-sky id="vs" src="#foto-ed" rotation="0 -90 0"></a-sky>
+      <a-entity id="cam-ed" camera look-controls="enabled: true">
+        <a-cursor color="#4a9e8e" opacity="0.35" fuse="false"></a-cursor>
+      </a-entity>
+    </a-scene>
+  </div>
+
+  <!-- Props derecha -->
+  <div id="panel-props">
+    <div class="panel-hdr">Propiedades</div>
+    <div id="props-body">
+      <div id="props-vacio">← Selecciona<br>una especie</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal agregar -->
+<div class="modal-bg" id="modal-ag">
+  <div class="modal-box">
+    <h2>+ Agregar especie</h2>
+    <div class="campo"><label>Nombre común *</label><input id="m-nom" type="text" placeholder="Pato Mexicano"></div>
+    <div class="campo"><label>Nombre científico</label><input id="m-cient" type="text" placeholder="Anas diazi"></div>
+    <div class="campo">
+      <label>Grupo *</label>
+      <select id="m-grupo">
+        <option value="aves">🐦 Aves</option>
+        <option value="anfibios">🐸 Anfibios</option>
+        <option value="reptiles">🦎 Reptiles</option>
+      </select>
+    </div>
+    <div class="campo"><label>Ruta imagen (PNG sin fondo) *</label><input id="m-img" type="text" placeholder="assets/pato.png"></div>
+    <div class="campo"><label>Ruta audio (mp3 / wav)</label><input id="m-aud" type="text" placeholder="assets/sonido_pato.mp3"></div>
+    <div class="modal-btns">
+      <button class="btn rojo" onclick="cerrarAgregar()">Cancelar</button>
+      <button class="btn solido" onclick="agregar()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal JSON -->
+<div class="modal-bg" id="modal-json">
+  <div id="json-grande">
+    <h2>📋 Copia esto y guárdalo como <code style="color:var(--verde)">especies.json</code></h2>
+    <textarea id="json-txt" readonly></textarea>
+    <div class="json-btns">
+      <span id="copy-ok">¡Copiado!</span>
+      <button class="btn" onclick="copiar()">Copiar</button>
+      <button class="btn solido" onclick="cerrarJson()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// ESTADO
+// ════════════════════════════════════════
+const GRUPOS = {
+  aves:     { dot: 'dot-aves',     label:'Aves',     emoji:'🐦' },
+  anfibios: { dot: 'dot-anfibios', label:'Anfibios', emoji:'🐸' },
+  reptiles: { dot: 'dot-reptiles', label:'Reptiles', emoji:'🦎' }
+};
+
+let especies   = [];
+let activo     = null;   // id
+let ents       = {};     // id → a-image
+let teclaD     = false;
+let drag       = false;
+let lx = 0, ly = 0;
+
+// ════════════════════════════════════════
+// FOTO 360°
+// ════════════════════════════════════════
+function cambiarFoto(ruta) {
+  if (!ruta) return;
+  const el = document.getElementById('foto-ed');
+  el.src = ruta;
+  // Actualizar la textura en A-Frame
+  const sky = document.getElementById('vs');
+  if (sky) sky.setAttribute('src', '#foto-ed');
+}
+
+// ════════════════════════════════════════
+// TECLA D → modo arrastre
+// ════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if ((e.key==='d'||e.key==='D') && !e.repeat) {
+    teclaD = true; setDragMode(true);
+  }
+  if (e.key==='Escape') { cerrarAgregar(); cerrarJson(); }
+});
+document.addEventListener('keyup', e => {
+  if (e.key==='d'||e.key==='D') {
+    teclaD = false;
+    if (!drag) setDragMode(false);
+  }
+});
+
+function setDragMode(on) {
+  document.getElementById('cam-ed').setAttribute('look-controls','enabled:'+(!on));
+  const wr = document.getElementById('escena-wrapper');
+  wr.classList.toggle('modo-drag', on);
+  document.getElementById('modo-badge').textContent  = on ? '🖱️ Arrastre' : '🎥 Cámara';
+  document.getElementById('modo-badge').classList.toggle('drag', on);
+  document.getElementById('hint').innerHTML = on
+    ? 'Haz clic y arrastra · Scroll = altura · Suelta <kbd>D</kbd> para mover cámara'
+    : 'Selecciona especie → mantén <kbd>D</kbd> y arrastra · Scroll = altura';
+}
+
+// ════════════════════════════════════════
+// DRAG EN DOM
+// ════════════════════════════════════════
+const wrapper = document.getElementById('escena-wrapper');
+
+wrapper.addEventListener('mousedown', e => {
+  if (!teclaD || !activo) return;
+  drag = true; lx = e.clientX; ly = e.clientY;
+  wrapper.classList.add('arrastrando');
+  e.preventDefault(); e.stopPropagation();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!drag || !activo) return;
+  mover(activo, e.clientX-lx, e.clientY-ly);
+  lx = e.clientX; ly = e.clientY;
+});
+
+document.addEventListener('mouseup', () => {
+  if (!drag) return;
+  drag = false;
+  wrapper.classList.remove('arrastrando');
+  if (!teclaD) setDragMode(false);
+});
+
+wrapper.addEventListener('wheel', e => {
+  if (!activo) return;
+  const esp = get(activo), el = ents[activo];
+  if (!esp||!el) return;
+  esp.py = (parseFloat(esp.py) - e.deltaY*0.004).toFixed(2);
+  el.setAttribute('position',`${esp.px} ${esp.py} ${esp.pz}`);
+  showCoords(esp); syncXYZ(esp);
+  e.preventDefault();
+}, { passive:false });
+
+function mover(id, dx, dy) {
+  const esp = get(id), el = ents[id];
+  if (!esp||!el) return;
+  const cam  = document.getElementById('cam-ed');
+  const rotY = cam.object3D.rotation.y;
+  const dist = Math.max(Math.sqrt(esp.px**2+esp.pz**2), 2);
+  const spd  = 0.007 * dist;
+  esp.px = (parseFloat(esp.px)+(dx*Math.cos(rotY)+dy*Math.sin(rotY))*spd).toFixed(2);
+  esp.pz = (parseFloat(esp.pz)+(-dx*Math.sin(rotY)+dy*Math.cos(rotY))*spd).toFixed(2);
+  el.setAttribute('position',`${esp.px} ${esp.py} ${esp.pz}`);
+  showCoords(esp); syncXYZ(esp);
+}
+
+function showCoords(esp) {
+  const c = document.getElementById('coords');
+  c.style.display = 'block';
+  c.textContent   = `x: ${esp.px} · y: ${esp.py} · z: ${esp.pz}`;
+}
+
+// ════════════════════════════════════════
+// MODAL AGREGAR
+// ════════════════════════════════════════
+function abrirAgregar() {
+  document.getElementById('modal-ag').classList.add('vis');
+  document.getElementById('m-nom').focus();
+}
+function cerrarAgregar() {
+  document.getElementById('modal-ag').classList.remove('vis');
+  ['m-nom','m-cient','m-img','m-aud'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('m-grupo').value = 'aves';
+}
+
+function agregar() {
+  const nom   = document.getElementById('m-nom').value.trim();
+  const cient = document.getElementById('m-cient').value.trim();
+  const grupo = document.getElementById('m-grupo').value;
+  const img   = document.getElementById('m-img').value.trim();
+  const aud   = document.getElementById('m-aud').value.trim();
+  if (!nom||!img) { alert('El nombre y la imagen son obligatorios.'); return; }
+
+  const id  = 'esp_' + Date.now();
+  const esp = {
+    id, nombre:nom, cientifico:cient, grupo,
+    imagen:img, audio:aud,
+    px:(Math.random()*4-2).toFixed(2),
+    py:(Math.random()*0.6-0.3).toFixed(2),
+    pz:(-3.5-Math.random()).toFixed(2),
+    sx:2, sy:2, volumen:1
+  };
+  especies.push(esp);
+  cerrarAgregar();
+  crearEntidad(esp);
+  renderLista();
+  seleccionar(id);
+}
+
+// ════════════════════════════════════════
+// CREAR ENTIDAD A-FRAME
+// ════════════════════════════════════════
+function crearEntidad(esp) {
+  const assets = document.getElementById('a-assets');
+  const escena = document.getElementById('escena');
+
+  const iEl = document.createElement('img');
+  iEl.id  = 'img_' + esp.id;
+  iEl.src = esp.imagen;
+  // Sin crossOrigin: el editor solo necesita mostrar las imágenes, no procesarlas
+  // como textura WebGL. Con crossOrigin='anonymous' el navegador bloquea archivos
+  // locales (file://) y causa que aparezcan en blanco.
+  assets.appendChild(iEl);
+
+  if (esp.audio) {
+    const aEl = document.createElement('audio');
+    aEl.id='snd_'+esp.id; aEl.src=esp.audio; aEl.preload='auto';
+    assets.appendChild(aEl);
+  }
+
+  const el = document.createElement('a-image');
+  el.id = 'el_'+esp.id;
+  el.setAttribute('src',      '#img_'+esp.id);
+  el.setAttribute('position', `${esp.px} ${esp.py} ${esp.pz}`);
+  el.setAttribute('scale',    `${esp.sx} ${esp.sy} 1`);
+  el.setAttribute('look-at',  '#cam-ed');
+  el.setAttribute('opacity',  '1');
+  if (esp.audio) {
+    el.setAttribute('sound',`src: #snd_${esp.id}; loop:true; volume:${esp.volumen}; positional:true; refDistance:2; rolloffFactor:2; maxDistance:10`);
+  }
+  el.addEventListener('click', () => { if (!teclaD && !drag) seleccionar(esp.id); });
+  escena.appendChild(el);
+  ents[esp.id] = el;
+}
+
+// ════════════════════════════════════════
+// SELECCIÓN Y PROPIEDADES
+// ════════════════════════════════════════
+function get(id) { return especies.find(e=>e.id===id); }
+
+function seleccionar(id) {
+  if (activo && ents[activo]) {
+    ents[activo].removeAttribute('material');
+    document.getElementById('item_'+activo)?.classList.remove('activo');
+  }
+  activo = id;
+  const esp = get(id); if (!esp) return;
+  ents[id]?.setAttribute('material','transparent:true;opacity:1;emissive:#1a6050;emissiveIntensity:0.5');
+  document.getElementById('item_'+id)?.classList.add('activo');
+  renderProps(esp);
+  showCoords(esp);
+}
+
+function renderProps(esp) {
+  const g = GRUPOS[esp.grupo] || GRUPOS.aves;
+  document.getElementById('props-body').innerHTML = `
+    <div class="prop"><label>Nombre común</label>
+      <input type="text" value="${esp.nombre}" oninput="upd('${esp.id}','nombre',this.value)"></div>
+    <div class="prop"><label>Nombre científico</label>
+      <input type="text" value="${esp.cientifico||''}" oninput="upd('${esp.id}','cientifico',this.value)"></div>
+    <div class="prop"><label>Grupo</label>
+      <select onchange="upd('${esp.id}','grupo',this.value);renderLista()">
+        <option value="aves"     ${esp.grupo==='aves'?'selected':''}>🐦 Aves</option>
+        <option value="anfibios" ${esp.grupo==='anfibios'?'selected':''}>🐸 Anfibios</option>
+        <option value="reptiles" ${esp.grupo==='reptiles'?'selected':''}>🦎 Reptiles</option>
+      </select></div>
+    <div class="prop"><label>Posición XYZ</label>
+      <div class="xyz">
+        <div class="xyz-item"><label>X</label><input id="p-px" type="number" step="0.1" value="${esp.px}" oninput="updPos('${esp.id}','x',this.value)"></div>
+        <div class="xyz-item"><label>Y</label><input id="p-py" type="number" step="0.1" value="${esp.py}" oninput="updPos('${esp.id}','y',this.value)"></div>
+        <div class="xyz-item"><label>Z</label><input id="p-pz" type="number" step="0.1" value="${esp.pz}" oninput="updPos('${esp.id}','z',this.value)"></div>
+      </div></div>
+    <div class="prop"><label>Tamaño</label>
+      <div class="range-fila">
+        <input type="range" min="0.3" max="6" step="0.1" value="${esp.sx}" oninput="updEsc('${esp.id}',this.value)">
+        <span class="range-val" id="v-esc">${esp.sx}×</span>
+      </div></div>
+    <div class="prop"><label>Volumen inicial</label>
+      <div class="range-fila">
+        <input type="range" min="0" max="1" step="0.05" value="${esp.volumen}" oninput="updVol('${esp.id}',this.value)">
+        <span class="range-val" id="v-vol">${Math.round(esp.volumen*100)}%</span>
+      </div></div>
+    <div class="prop"><label>Ruta imagen</label>
+      <input type="text" value="${esp.imagen}" oninput="upd('${esp.id}','imagen',this.value)"></div>
+    <div class="prop"><label>Ruta audio</label>
+      <input type="text" value="${esp.audio||''}" oninput="upd('${esp.id}','audio',this.value)"></div>
+    <button class="btn rojo" style="width:100%;margin-top:4px" onclick="eliminar('${esp.id}')">✕ Eliminar</button>
+  `;
+}
+
+function syncXYZ(esp) {
+  const f = id => document.getElementById(id);
+  if(f('p-px')) f('p-px').value=esp.px;
+  if(f('p-py')) f('p-py').value=esp.py;
+  if(f('p-pz')) f('p-pz').value=esp.pz;
+}
+
+function upd(id, k, v) { const e=get(id); if(e) e[k]=v; }
+
+function updPos(id, eje, v) {
+  const esp=get(id), el=ents[id]; if(!esp||!el) return;
+  esp['p'+eje]=parseFloat(v).toFixed(2);
+  el.setAttribute('position',`${esp.px} ${esp.py} ${esp.pz}`);
+  showCoords(esp);
+}
+
+function updEsc(id, v) {
+  const esp=get(id), el=ents[id]; if(!esp||!el) return;
+  esp.sx=esp.sy=parseFloat(v);
+  el.setAttribute('scale',`${v} ${v} 1`);
+  document.getElementById('v-esc').textContent=parseFloat(v).toFixed(1)+'×';
+}
+
+function updVol(id, v) {
+  const esp=get(id); if(esp) esp.volumen=parseFloat(v);
+  document.getElementById('v-vol').textContent=Math.round(v*100)+'%';
+}
+
+// ════════════════════════════════════════
+// ELIMINAR / LIMPIAR
+// ════════════════════════════════════════
+function eliminar(id) {
+  if (!confirm('¿Eliminar esta especie?')) return;
+  ents[id]?.parentNode?.removeChild(ents[id]);
+  especies = especies.filter(e=>e.id!==id);
+  delete ents[id];
+  if (activo===id) {
+    activo=null;
+    document.getElementById('props-body').innerHTML='<div id="props-vacio">← Selecciona<br>una especie</div>';
+    document.getElementById('coords').style.display='none';
+  }
+  renderLista();
+}
+
+function limpiar() {
+  if (!confirm('¿Eliminar todas las especies?')) return;
+  especies.forEach(e=>ents[e.id]?.parentNode?.removeChild(ents[e.id]));
+  especies=[]; ents={}; activo=null;
+  document.getElementById('props-body').innerHTML='<div id="props-vacio">← Selecciona<br>una especie</div>';
+  document.getElementById('coords').style.display='none';
+  renderLista();
+}
+
+// ════════════════════════════════════════
+// RENDER LISTA
+// ════════════════════════════════════════
+function renderLista() {
+  const el = document.getElementById('lista');
+  document.getElementById('count').textContent = especies.length;
+  if (!especies.length) {
+    el.innerHTML='<div style="text-align:center;padding:22px 10px;font-size:0.74rem;color:rgba(240,232,213,0.28);line-height:1.9">Agrega tu primera especie</div>';
+    return;
+  }
+  const FALLBACK = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 36 36%22><rect fill=%22%23234%22 width=%2236%22 height=%2236%22/><text x=%2218%22 y=%2224%22 text-anchor=%22middle%22 font-size=%2218%22>🐾</text></svg>`;
+  el.innerHTML = especies.map(esp => {
+    const g = GRUPOS[esp.grupo] || GRUPOS.aves;
+    return `<div class="item ${activo===esp.id?'activo':''}" id="item_${esp.id}" onclick="seleccionar('${esp.id}')">
+      <div class="dot ${g.dot}"></div>
+      <img class="item-thumb" src="${esp.imagen}" onerror="this.src='${FALLBACK}'">
+      <div class="item-info">
+        <div class="item-nom">${esp.nombre}</div>
+        <div class="item-cient">${esp.cientifico||'—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// EXPORTAR JSON
+// ════════════════════════════════════════
+function exportar() {
+  const out = especies.map(e=>({
+    id:e.id, nombre:e.nombre, cientifico:e.cientifico||'',
+    grupo:e.grupo, imagen:e.imagen, audio:e.audio||'',
+    posicion:`${e.px} ${e.py} ${e.pz}`,
+    escala:`${e.sx} ${e.sy} 1`,
+    volumen:e.volumen
+  }));
+  document.getElementById('json-txt').value = JSON.stringify(out, null, 2);
+  document.getElementById('modal-json').classList.add('vis');
+}
+
+function copiar() {
+  navigator.clipboard.writeText(document.getElementById('json-txt').value).then(()=>{
+    const fb=document.getElementById('copy-ok');
+    fb.classList.add('vis');
+    setTimeout(()=>fb.classList.remove('vis'), 2200);
+  });
+}
+function cerrarJson() { document.getElementById('modal-json').classList.remove('vis'); }
+
+['modal-ag','modal-json'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', e=>{ if(e.target.id===id){ cerrarAgregar(); cerrarJson(); } });
+});
+</script>
+</body>
+</html>
