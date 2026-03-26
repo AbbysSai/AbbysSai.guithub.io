@@ -189,7 +189,7 @@
       position: fixed;
       top: 70px;
       left: 16px;
-      width: min(300px, 90vw);
+      width: min(340px, 92vw);
       background: var(--panel-bg);
       border: 1px solid rgba(62,181,200,0.25);
       border-radius: 20px;
@@ -227,27 +227,15 @@
     .grupo-reptiles { background: rgba(232,168,77,0.15);  color: var(--color-reptiles); }
     .grupo-ambiente { background: rgba(255,255,255,0.06); color: rgba(253,246,227,0.7); font-size: 0.8rem; }
 
-    .track {
-      margin-bottom: 12px;
-    }
-    .track:last-child { margin-bottom: 0; }
-
+    /* ── Ambiente track ── */
+    .track-ambiente { margin-bottom: 4px; }
     .track-fila {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 5px;
     }
-
-    .track-nombre {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--crema);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
+    .track-nombre { font-size: 0.78rem; font-weight: 700; color: var(--crema); }
     .track-pct {
       font-size: 0.7rem;
       color: rgba(253,246,227,0.45);
@@ -255,19 +243,317 @@
       min-width: 34px;
       text-align: right;
     }
-
     input[type=range] {
       width: 100%;
-      height: 6px;
+      height: 8px;
       cursor: pointer;
       accent-color: var(--azul-agua);
-      border-radius: 3px;
+      border-radius: 4px;
     }
 
-    /* Colores de acento por grupo */
-    .aves-slider    { accent-color: var(--color-aves); }
-    .anfibios-slider{ accent-color: var(--color-anfibios); }
-    .reptiles-slider{ accent-color: var(--color-reptiles); }
+    /* ══ TARJETAS DE ESPECIE (panel niños) ══ */
+    .especie-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 12px 14px 10px;
+      margin-bottom: 10px;
+      transition: border-color 0.3s;
+    }
+    .especie-card:last-child { margin-bottom: 0; }
+    .especie-card.sonando-card {
+      border-color: var(--amarillo);
+      box-shadow: 0 0 12px rgba(245,200,66,0.25);
+    }
+
+    .especie-card-header {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+    }
+    .especie-emoji-big {
+      font-size: 1.7rem;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .especie-card.sonando-card .especie-emoji-big {
+      animation: rebote-emoji 0.4s ease-in-out infinite alternate;
+    }
+    @keyframes rebote-emoji {
+      from { transform: scale(1) rotate(-5deg); }
+      to   { transform: scale(1.2) rotate(5deg); }
+    }
+
+    .especie-card-info { flex: 1; min-width: 0; }
+    .especie-card-nombre {
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--crema);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .especie-card-cientifico {
+      font-size: 0.62rem;
+      font-style: italic;
+      color: rgba(253,246,227,0.38);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .especie-card-led {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      flex-shrink: 0;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .especie-card-led.activo  { background: var(--verde-vivo); box-shadow: 0 0 7px var(--verde-vivo); }
+    .especie-card-led.sonando { background: var(--amarillo);   box-shadow: 0 0 10px var(--amarillo); animation: led-pulsar 0.35s ease-in-out infinite alternate; }
+    @keyframes led-pulsar { from { opacity:.55; } to { opacity:1; } }
+
+    /* Slider de intervalo */
+    .timer-slider-wrap { position: relative; }
+
+    .timer-slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .timer-slider-label-left {
+      font-size: 0.72rem;
+      color: rgba(253,246,227,0.5);
+      font-weight: 600;
+    }
+    .timer-badge {
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.92rem;
+      font-weight: 800;
+      padding: 2px 10px;
+      border-radius: 20px;
+      background: rgba(62,181,200,0.18);
+      color: var(--azul-agua);
+      min-width: 72px;
+      text-align: center;
+    }
+    .timer-badge.apagado {
+      background: rgba(255,255,255,0.07);
+      color: rgba(253,246,227,0.3);
+    }
+
+    /* Slider gordo para niños */
+    .timer-slider {
+      width: 100%;
+      height: 12px !important;
+      border-radius: 6px !important;
+      cursor: pointer;
+    }
+    .aves-slider    { accent-color: var(--color-aves) !important; }
+    .anfibios-slider{ accent-color: var(--color-anfibios) !important; }
+    .reptiles-slider{ accent-color: var(--color-reptiles) !important; }
+
+    .timer-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3px;
+      padding: 0 2px;
+    }
+    .timer-tick {
+      font-size: 0.55rem;
+      color: rgba(253,246,227,0.22);
+      font-family: monospace;
+    }
+
+    /* ── Botones de acción del panel ── */
+    .panel-acciones {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    #btn-aleatorio, #btn-silenciar {
+      flex: 1;
+      padding: 10px 0;
+      border-radius: 14px;
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: 0.2px;
+      border: 1px solid;
+    }
+    #btn-aleatorio {
+      background: linear-gradient(135deg, rgba(92,184,92,0.28), rgba(62,181,200,0.22));
+      border-color: rgba(92,184,92,0.4);
+      color: var(--crema);
+    }
+    #btn-aleatorio:hover  { background: linear-gradient(135deg, rgba(92,184,92,0.42), rgba(62,181,200,0.35)); transform: scale(1.02); }
+    #btn-aleatorio:active { transform: scale(0.96); }
+    #btn-silenciar {
+      background: rgba(240,100,80,0.15);
+      border-color: rgba(240,100,80,0.35);
+      color: rgba(253,246,227,0.85);
+    }
+    #btn-silenciar:hover  { background: rgba(240,100,80,0.28); transform: scale(1.02); }
+    #btn-silenciar:active { transform: scale(0.96); }
+
+    /* ══════════════════════════════════════
+       BOTÓN Y PANEL GUÍA DE ESPECIES
+    ══════════════════════════════════════ */
+    #btn-guia {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9000;
+      display: none;
+      background: var(--panel-bg);
+      border: 2px solid rgba(245,200,66,0.4);
+      border-radius: 50px;
+      padding: 10px 20px;
+      color: var(--crema);
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--sombra);
+      backdrop-filter: blur(10px);
+      transition: transform 0.15s, background 0.2s;
+      align-items: center;
+      gap: 8px;
+    }
+    #btn-guia:hover { background: rgba(245,200,66,0.2); transform: scale(1.04); }
+
+    #panel-guia {
+      position: fixed;
+      top: 70px;
+      right: 16px;
+      left: auto;
+      width: min(320px, 92vw);
+      background: var(--panel-bg);
+      border: 1px solid rgba(245,200,66,0.25);
+      border-radius: 20px;
+      z-index: 9000;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--sombra);
+      display: none;
+      overflow: hidden;
+      max-height: calc(100vh - 130px);
+      overflow-y: auto;
+    }
+    #panel-guia::-webkit-scrollbar { width: 4px; }
+    #panel-guia::-webkit-scrollbar-thumb { background: rgba(245,200,66,0.3); border-radius: 4px; }
+
+    .guia-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: sticky; top: 0;
+      background: rgba(15,40,20,0.97);
+      z-index: 1;
+      border-radius: 20px 20px 0 0;
+    }
+    .guia-titulo {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--crema);
+      flex-shrink: 0;
+    }
+    .guia-progreso-wrap {
+      flex: 1;
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .guia-progreso-barra {
+      height: 100%;
+      background: linear-gradient(90deg, var(--amarillo), var(--naranja));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .guia-progreso-txt {
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--amarillo);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .guia-grupo-titulo {
+      font-family: 'Baloo 2', cursive;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 8px 16px 4px;
+      color: rgba(253,246,227,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .guia-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .guia-item:last-child { border-bottom: none; }
+    .guia-item:hover  { background: rgba(255,255,255,0.06); }
+    .guia-item:active { background: rgba(255,255,255,0.1); }
+
+    .guia-item-emoji {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      filter: grayscale(1) opacity(0.3);
+      transition: filter 0.4s;
+    }
+    .guia-item.descubierta .guia-item-emoji { filter: grayscale(0) opacity(1); }
+
+    .guia-item-texto { flex: 1; min-width: 0; }
+    .guia-item-nombre {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: rgba(253,246,227,0.35);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: color 0.3s;
+    }
+    .guia-item.descubierta .guia-item-nombre { color: var(--crema); }
+    .guia-item-cientifico {
+      font-size: 0.6rem; font-style: italic;
+      color: rgba(253,246,227,0.18);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: color 0.3s;
+    }
+    .guia-item.descubierta .guia-item-cientifico { color: rgba(253,246,227,0.35); }
+
+    .guia-item-check {
+      font-size: 1.1rem; flex-shrink: 0;
+      opacity: 0; transform: scale(0.4);
+      transition: opacity 0.35s, transform 0.35s;
+    }
+    .guia-item.descubierta .guia-item-check { opacity: 1; transform: scale(1); }
+
+    .guia-tip {
+      font-size: 0.62rem; color: rgba(253,246,227,0.22);
+      text-align: center; padding: 8px 16px 12px; line-height: 1.5;
+    }
+
+    @keyframes descubrir-flash {
+      0%   { background: rgba(245,200,66,0.25); }
+      100% { background: transparent; }
+    }
+    .guia-item.flash-desc { animation: descubrir-flash 0.9s ease-out; }
 
     /* ══════════════════════════════════════
        TARJETA DE ESPECIE (tooltip al tocar)
@@ -331,7 +617,8 @@
     ══════════════════════════════════════ */
     #btn-info {
       position: fixed;
-      top: 16px;
+      bottom: 16px;
+      top: auto;
       right: 16px;
       z-index: 9000;
       display: none;
@@ -697,6 +984,16 @@
   <button id="btn-mezcladora" onclick="toggleMezcladora()">
     🎛️ Sonidos
   </button>
+
+  <!-- ══ BOTÓN GUÍA ══ -->
+  <button id="btn-guia" onclick="toggleGuia()">
+    📖 Guía
+  </button>
+
+  <!-- ══ PANEL GUÍA DE ESPECIES ══ -->
+  <div id="panel-guia">
+    <!-- Se genera dinámicamente -->
+  </div>
 
   <!-- ══ BOTÓN INFO ══ -->
   <button id="btn-info" onclick="toggleInfo()">
@@ -1116,6 +1413,7 @@
       const colorHalo = { aves:'#4db8e8', anfibios:'#6dcf7a', reptiles:'#e8a84d' }[grupo] || '#4db8e8';
 
       const halo = document.createElement('a-circle');
+      halo.id = 'halo-' + esp.id;
       halo.setAttribute('position', `${px} ${py - 1.2} ${pz}`);
       halo.setAttribute('radius',   '0.6');
       halo.setAttribute('rotation', '-90 0 0');
@@ -1125,6 +1423,23 @@
         'property: scale; from: 1 1 1; to: 1.4 1.4 1.4; dur: 1800; ' +
         'easing: easeInOutSine; loop: true; dir: alternate');
       escena.appendChild(halo);
+
+      // ── Nivel 3: contorno de color detrás de la imagen ──
+      // Un a-plane ligeramente más grande con el color del grupo actúa como borde
+      const [sx, sy] = esp.escala.split(' ').map(parseFloat);
+      const borde = document.createElement('a-plane');
+      borde.id = 'borde-' + esp.id;
+      borde.setAttribute('position', esp.posicion);
+      borde.setAttribute('scale',    `${sx + 0.18} ${sy + 0.18} 1`);
+      borde.setAttribute('look-at',  '#camara');
+      borde.setAttribute('color',    colorHalo);
+      borde.setAttribute('opacity',  '0.55');
+      // Retroceder levemente para que quede detrás de la imagen
+      borde.setAttribute('material', 'depthWrite: false');
+      borde.setAttribute('animation',
+        'property: opacity; from: 0.35; to: 0.75; dur: 2200; ' +
+        'easing: easeInOutSine; loop: true; dir: alternate');
+      escena.appendChild(borde);
 
       // ── Imagen de la especie ──
       const el = document.createElement('a-image');
@@ -1211,17 +1526,319 @@
   }
 
   // ════════════════════════════════════════════════
-  // CONSTRUIR MEZCLADORA AGRUPADA
+  // SISTEMA DE TEMPORIZADORES POR ESPECIE
+  // Cada especie tiene un slider que define cada cuántos
+  // segundos se reproduce su sonido automáticamente.
   // ════════════════════════════════════════════════
+  const timers    = {};        // id → intervalId
+
+  // Máximo de segundos recomendado por grupo
+  function _maxSegundos(esp) {
+    return 180; // 3 minutos para todas las especies
+  }
+
+  // Emoji representativo por grupo
+  function _emojiEsp(esp) {
+    return { aves:'🐦', anfibios:'🐸', reptiles:'🦎' }[esp.grupo] || '🐾';
+  }
+
+  // Texto legible del intervalo
+  function _labelIntervalo(seg) {
+    if (!seg || seg <= 0) return '🔇 Apagado';
+    if (seg < 60) return `cada ${seg}s`;
+    const m = Math.floor(seg / 60), s = seg % 60;
+    return s ? `cada ${m}m ${s}s` : `cada ${m} min`;
+  }
+
+  function iniciarTimer(id, segundos) {
+    detenerTimer(id);
+    if (!segundos || segundos <= 0) return;
+    // Espera el intervalo completo antes del primer disparo
+    timers[id] = setInterval(() => _sonarEspecie(id), segundos * 1000);
+    _setLed(id, 'activo');
+  }
+
+  function detenerTimer(id) {
+    if (timers[id]) { clearInterval(timers[id]); }
+    delete timers[id];
+    _setLed(id, '');
+    _setCardSonando(id, false);
+  }
+
+  function _sonarEspecie(id) {
+    _setLed(id, 'sonando');
+    _setCardSonando(id, true);
+    _activarAudio(id);
+    setTimeout(() => {
+      _silenciarAudio(id);
+      _setLed(id, timers[id] !== undefined ? 'activo' : '');
+      _setCardSonando(id, false);
+    }, 3500);
+  }
+
+  function _setLed(id, estado) {
+    const led = document.getElementById('led-' + id);
+    if (led) led.className = 'especie-card-led' + (estado ? ' ' + estado : '');
+  }
+
+  function _setCardSonando(id, sonando) {
+    const card = document.getElementById('card-' + id);
+    if (card) card.classList.toggle('sonando-card', sonando);
+  }
+
+  // Llamado por el slider de cada especie
+  function cambiarTimer(id, valor) {
+    const seg = parseInt(valor);
+    const badge = document.getElementById('badge-' + id);
+    if (badge) {
+      badge.textContent = _labelIntervalo(seg);
+      badge.className   = 'timer-badge' + ((!seg || seg <= 0) ? ' apagado' : '');
+    }
+    if (!seg || seg <= 0) { detenerTimer(id); }
+    else                  { iniciarTimer(id, seg); }
+  }
+
+  // Botón 🎲: valores aleatorios con escalonado real entre especies
+  function aleatorizarTimers() {
+    especiesData.forEach((esp, idx) => {
+      const max = _maxSegundos(esp);
+      const seg = Math.floor(Math.random() * (max - 5 + 1)) + 5;
+      const slider = document.getElementById('slider-' + esp.id);
+      if (slider) {
+        slider.value = seg;
+        // Actualizar badge inmediatamente
+        const badge = document.getElementById('badge-' + esp.id);
+        if (badge) {
+          badge.textContent = _labelIntervalo(seg);
+          badge.className   = 'timer-badge';
+        }
+        // Detener timer anterior y arrancar nuevo con jitter escalonado
+        detenerTimer(esp.id);
+        // Cada especie arranca con un retardo diferente para que NO coincidan
+        const jitterMs = idx * 1200 + Math.random() * 800;
+        setTimeout(() => {
+          iniciarTimerDirecto(esp.id, seg);
+        }, jitterMs);
+      }
+    });
+  }
+
+  // Inicia el timer con escalonado externo — usado por aleatorizarTimers
+  // NO dispara inmediatamente: espera el primer intervalo para no sonar todo junto
+  function iniciarTimerDirecto(id, segundos) {
+    detenerTimer(id);
+    if (!segundos || segundos <= 0) return;
+    timers[id] = setInterval(() => _sonarEspecie(id), segundos * 1000);
+    _setLed(id, 'activo');
+  }
+
+  // Silenciar y apagar todos los temporizadores
+  function silenciarTodo() {
+    especiesData.forEach(esp => {
+      detenerTimer(esp.id);
+      _silenciarAudio(esp.id);
+      const slider = document.getElementById('slider-' + esp.id);
+      if (slider) slider.value = 0;
+      const badge = document.getElementById('badge-' + esp.id);
+      if (badge) { badge.textContent = '🔇 Apagado'; badge.className = 'timer-badge apagado'; }
+    });
+  }
+
+  // ════════════════════════════════════════════════
+  // GUÍA DE ESPECIES — descubiertas / por descubrir
+  // ════════════════════════════════════════════════
+  const descubiertas = new Set();
+  let guiaVisible = false;
+
+  function marcarDescubierta(id) {
+    if (descubiertas.has(id)) return;
+    descubiertas.add(id);
+
+    // Actualizar ítem en el panel
+    const item = document.getElementById('guia-item-' + id);
+    if (item) {
+      item.classList.add('descubierta');
+      item.classList.add('flash-desc');
+      setTimeout(() => item.classList.remove('flash-desc'), 900);
+    }
+    _actualizarProgreso();
+  }
+
+  function _actualizarProgreso() {
+    const total = especiesData.length;
+    const found = descubiertas.size;
+    const pct   = total ? Math.round((found / total) * 100) : 0;
+
+    const barra = document.getElementById('guia-barra');
+    const txt   = document.getElementById('guia-txt');
+    if (barra) barra.style.width = pct + '%';
+    if (txt)   txt.textContent   = found + '/' + total;
+
+    // También actualizar el emoji del botón si está completo
+    const btn = document.getElementById('btn-guia');
+    if (btn) btn.innerHTML = found === total ? '🏆 Guía' : '📖 Guía';
+  }
+
+  function construirGuia() {
+    const panel = document.getElementById('panel-guia');
+    const total = especiesData.length;
+
+    let html = `
+      <div class="guia-header">
+        <span class="guia-titulo">📖 Guía</span>
+        <div class="guia-progreso-wrap">
+          <div class="guia-progreso-barra" id="guia-barra" style="width:0%"></div>
+        </div>
+        <span class="guia-progreso-txt" id="guia-txt">0/${total}</span>
+      </div>`;
+
+    const gruposPresentes = [...new Set(especiesData.map(e => e.grupo))];
+    gruposPresentes.forEach(grupoId => {
+      const g    = GRUPOS[grupoId] || { label:grupoId, emoji:'🐾' };
+      const esps = especiesData.filter(e => e.grupo === grupoId);
+      html += `<div class="guia-grupo-titulo">${g.emoji} ${g.label}</div>`;
+      esps.forEach(esp => {
+        const emoji = _emojiEsp(esp);
+        html += `
+          <div class="guia-item" id="guia-item-${esp.id}" onclick="irAEspecie('${esp.id}')">
+            <span class="guia-item-emoji">${emoji}</span>
+            <div class="guia-item-texto">
+              <div class="guia-item-nombre">${esp.nombre}</div>
+              <div class="guia-item-cientifico">${esp.cientifico || ''}</div>
+            </div>
+            <span class="guia-item-check">⭐</span>
+          </div>`;
+      });
+    });
+
+    html += `<p class="guia-tip">👆 Toca un animal en la escena para descubrirlo.<br>Pulsa su nombre aquí para ir a verlo.</p>`;
+    panel.innerHTML = html;
+  }
+
+  function toggleGuia() {
+    guiaVisible = !guiaVisible;
+    const panel = document.getElementById('panel-guia');
+    const btn   = document.getElementById('btn-guia');
+    panel.style.display  = guiaVisible ? 'block' : 'none';
+    btn.style.background = guiaVisible ? 'rgba(245,200,66,0.2)' : 'var(--panel-bg)';
+    // Cerrar mezcladora si estaba abierta
+    if (guiaVisible && mezclaVisible) toggleMezcladora();
+  }
+
+  // ════════════════════════════════════════════════
+  // IR A UNA ESPECIE: rotar cámara hacia su posición
+  // ════════════════════════════════════════════════
+  function irAEspecie(id) {
+    const esp = especiesData.find(e => e.id === id);
+    if (!esp) return;
+
+    const [px, py, pz] = esp.posicion.split(' ').map(parseFloat);
+
+    // Matemática correcta para A-Frame look-controls (Three.js YXZ):
+    // La cámara mira -Z por defecto. look-controls usa:
+    //   yawObject.rotation.y   (negativo = mirar derecha)
+    //   pitchObject.rotation.x (positivo = mirar arriba)
+    //
+    // Fórmula derivada del rotation matrix Y(θ) aplicado a (0,0,-1):
+    //   forward = (-sinθ, 0, -cosθ)  →  θ = atan2(-px, -pz)
+    //
+    // Pitch: atan2(py, dist_horizontal) con signo positivo = arriba
+    const dist   = Math.sqrt(px * px + pz * pz);
+    const yawRad   =  Math.atan2(-px, -pz);
+    const pitchRad =  Math.atan2( py,  dist);
+
+    const camara = document.getElementById('camara');
+    if (!camara) return;
+
+    // Manipular los objetos internos de look-controls directamente.
+    // setAttribute('rotation') no funciona — look-controls lo sobreescribe cada frame.
+    const lookCtrl = camara.components && camara.components['look-controls'];
+    if (lookCtrl && lookCtrl.yawObject) {
+      lookCtrl.yawObject.rotation.set(0, yawRad, 0);
+      lookCtrl.pitchObject.rotation.set(pitchRad, 0, 0);
+    }
+
+    // Cerrar el panel para dejar la vista libre
+    if (guiaVisible) toggleGuia();
+
+    // Mostrar tarjeta e iluminar la especie
+    const entidad = document.getElementById('entidad-' + id);
+    if (entidad) {
+      mostrarTarjeta(entidad);
+      setTimeout(ocultarTarjeta, 3000);
+    }
+    iluminarEspecie(id);
+  }
+
+  // ════════════════════════════════════════════════
+  // ILUMINAR ESPECIE: pulso de brillo al navegar desde la guía
+  // ════════════════════════════════════════════════
+  function iluminarEspecie(id) {
+    const borde  = document.getElementById('borde-'  + id);
+    const halo   = document.getElementById('halo-'   + id);
+    const imagen = document.getElementById('entidad-' + id);
+
+    if (!borde) return;
+
+    // Guardar escala original del borde
+    const escalaOrig = borde.getAttribute('scale') || '2.18 2.18 1';
+
+    // ── Pulso en el borde (más grande y brillante) ──
+    borde.setAttribute('animation__glow',
+      'property: opacity; from: 1; to: 0.2; dur: 600; ' +
+      'easing: easeInOutSine; loop: 4; dir: alternate');
+    borde.setAttribute('animation__scale',
+      `property: scale; from: ${escalaOrig}; ` +
+      `to: ${escalaOrig.split(' ').map((v,i) => i < 2 ? (parseFloat(v) * 1.35).toFixed(2) : v).join(' ')}; ` +
+      'dur: 600; easing: easeInOutSine; loop: 4; dir: alternate');
+
+    // ── Halo en el suelo más visible ──
+    if (halo) {
+      halo.setAttribute('animation__haloglow',
+        'property: opacity; from: 0.9; to: 0.15; dur: 500; ' +
+        'easing: easeInOutSine; loop: 4; dir: alternate');
+      halo.setAttribute('animation__haloscale',
+        'property: scale; from: 2 2 1; to: 1 1 1; dur: 500; ' +
+        'easing: easeInOutSine; loop: 4; dir: alternate');
+    }
+
+    // ── Imagen: pequeño pulso de opacidad ──
+    if (imagen) {
+      imagen.setAttribute('animation__imgpulse',
+        'property: opacity; from: 1; to: 0.6; dur: 400; ' +
+        'easing: easeInOutSine; loop: 4; dir: alternate');
+    }
+
+    // Restaurar animaciones originales después del pulso (4 loops × 600ms = ~2.4s)
+    setTimeout(() => {
+      if (borde) {
+        borde.removeAttribute('animation__glow');
+        borde.removeAttribute('animation__scale');
+        borde.setAttribute('animation',
+          'property: opacity; from: 0.35; to: 0.75; dur: 2200; ' +
+          'easing: easeInOutSine; loop: true; dir: alternate');
+      }
+      if (halo) {
+        halo.removeAttribute('animation__haloglow');
+        halo.removeAttribute('animation__haloscale');
+        halo.setAttribute('animation',
+          'property: scale; from: 1 1 1; to: 1.4 1.4 1.4; dur: 1800; ' +
+          'easing: easeInOutSine; loop: true; dir: alternate');
+      }
+      if (imagen) {
+        imagen.removeAttribute('animation__imgpulse');
+      }
+    }, 2600);
+  }
   function construirMezcladora() {
     const panel = document.getElementById('mezcladora');
     let html = '';
 
-    // Ambiente
+    // ── Sonido ambiente (volumen) ──
     html += `
       <div class="mezcla-grupo">
         <div class="grupo-titulo grupo-ambiente">🌊 Sonido Ambiente</div>
-        <div class="track">
+        <div class="track-ambiente">
           <div class="track-fila">
             <span class="track-nombre">Viento y agua</span>
             <span class="track-pct" id="pct-ambiente">50%</span>
@@ -1231,27 +1848,61 @@
         </div>
       </div>`;
 
-    // Grupos de especies
+    // ── Sección temporizadores ──
+    html += `
+      <div class="mezcla-grupo">
+        <div class="grupo-titulo grupo-ambiente">
+          ⏱️ ¿Cada cuánto suenan?
+        </div>
+        <p style="font-size:0.7rem;color:rgba(253,246,227,0.42);margin-bottom:10px;line-height:1.5">
+          Mueve el slider para elegir cada cuántos segundos escucharás a cada animal. 🔇 = apagado.
+        </p>
+        <div class="panel-acciones">
+          <button id="btn-aleatorio" onclick="aleatorizarTimers()">🎲 Mezcla aleatoria</button>
+          <button id="btn-silenciar" onclick="silenciarTodo()">🔇 Silenciar todo</button>
+        </div>`;
+
     const gruposPresentes = [...new Set(especiesData.map(e => e.grupo))];
     gruposPresentes.forEach(grupoId => {
       const g    = GRUPOS[grupoId] || { label:grupoId, emoji:'🐾', clase:'grupo-ambiente', slider:'aves-slider' };
       const esps = especiesData.filter(e => e.grupo === grupoId);
 
-      html += `<div class="mezcla-grupo"><div class="grupo-titulo ${g.clase}">${g.emoji} ${g.label}</div>`;
+      html += `<div class="grupo-titulo ${g.clase}" style="margin-bottom:10px;font-size:0.8rem">${g.emoji} ${g.label}</div>`;
+
       esps.forEach(esp => {
-        const pct = Math.round(parseFloat(esp.volumen) * 100);
+        const max   = 180;  // 3 minutos para todas las especies
+        const emoji = _emojiEsp(esp);
+        const ticks = ['🔇', '45s', '1m30', '2m15', '3min'];
+
         html += `
-          <div class="track">
-            <div class="track-fila">
-              <span class="track-nombre">${esp.nombre}</span>
-              <span class="track-pct" id="pct-${esp.id}">${pct}%</span>
+          <div class="especie-card" id="card-${esp.id}">
+            <div class="especie-card-header">
+              <span class="especie-emoji-big">${emoji}</span>
+              <div class="especie-card-info">
+                <div class="especie-card-nombre">${esp.nombre}</div>
+                <div class="especie-card-cientifico">${esp.cientifico || ''}</div>
+              </div>
+              <div class="especie-card-led" id="led-${esp.id}"></div>
             </div>
-            <input type="range" class="${g.slider}" min="0" max="1" step="0.01" value="${esp.volumen}"
-              oninput="ajustarGain('${esp.id}', this.value, 'pct-${esp.id}', 'entidad-${esp.id}')">
+            <div class="timer-slider-wrap">
+              <div class="timer-slider-label">
+                <span class="timer-slider-label-left">⏰ Frecuencia</span>
+                <span class="timer-badge apagado" id="badge-${esp.id}">🔇 Apagado</span>
+              </div>
+              <input type="range" class="timer-slider ${g.slider}"
+                id="slider-${esp.id}"
+                min="0" max="180" step="1" value="0"
+                oninput="cambiarTimer('${esp.id}', this.value)">
+              <div class="timer-ticks">
+                ${ticks.map(t => `<span class="timer-tick">${t}</span>`).join('')}
+              </div>
+            </div>
           </div>`;
       });
-      html += `</div>`;
     });
+
+    html += `
+      </div>`;
 
     panel.innerHTML = html;
   }
@@ -1295,9 +1946,10 @@
     await _precargarFoto360();
     _setProgreso(50, 'Fotografía lista ✓');
 
-    // Paso 3: construir escena y mezcladora
+    // Paso 3: construir escena, mezcladora y guía
     construirEscena();
     construirMezcladora();
+    construirGuia();
     _setProgreso(60, 'Escena construida ✓');
 
     // Paso 4: cargar todos los audios en paralelo
@@ -1310,6 +1962,7 @@
 
     document.getElementById('cargando').style.display       = 'none';
     document.getElementById('btn-mezcladora').style.display = 'flex';
+    document.getElementById('btn-guia').style.display       = 'flex';
     document.getElementById('btn-info').style.display       = 'flex';
     _registrarToques();
   }
@@ -1328,6 +1981,7 @@
       el.addEventListener('mouseenter', () => {
         mostrarTarjeta(el);
         _activarAudio(espId);
+        marcarDescubierta(espId);
       });
       el.addEventListener('mouseleave', () => {
         ocultarTarjeta();
@@ -1336,6 +1990,7 @@
 
       // ── Móvil: primer tap activa, segundo tap silencia (toggle) ──
       el.addEventListener('click', () => {
+        marcarDescubierta(espId);
         if (especieActivaMobil === espId) {
           // Segundo tap: silenciar y ocultar
           ocultarTarjeta();
@@ -1432,11 +2087,14 @@
     const btn   = document.getElementById('btn-mezcladora');
     panel.style.display  = mezclaVisible ? 'block' : 'none';
     btn.style.background = mezclaVisible ? 'rgba(62,181,200,0.25)' : 'var(--panel-bg)';
+    // Cerrar guía si estaba abierta
+    if (mezclaVisible && guiaVisible) toggleGuia();
   }
 
-  // Cerrar mezcladora al tocar la escena
+  // Cerrar paneles al tocar la escena
   document.getElementById('escena')?.addEventListener('click', () => {
     if (mezclaVisible) toggleMezcladora();
+    if (guiaVisible)   toggleGuia();
   });
   </script>
 </body>
