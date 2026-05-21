@@ -1,0 +1,636 @@
+<!-- editor.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 Editor — Ciénegas de Lerma</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+<style>
+:root {
+  --verde:#4a9e8e; --oscuro:#0a1a10; --panel:rgba(10,22,15,0.97);
+  --crema:#f0e8d5; --arena:#c9a96e; --rojo:#e05c5c; --azul:#4db8e8;
+  --amarillo:#f5c842;
+  --s0:#6fcf97; --s1:#f2c94c; --s2:#f2994a; --s3:#eb5757;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Nunito',sans-serif;background:var(--oscuro);color:var(--crema);display:flex;flex-direction:column}
+
+/* ── Top bar ── */
+#topbar{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--panel);border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;flex-wrap:wrap}
+.logo{font-family:'Baloo 2',cursive;font-weight:800;font-size:1.05em;color:var(--verde);white-space:nowrap}
+.scene-tabs{display:flex;gap:5px}
+.tab{padding:5px 14px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--crema);border-radius:6px;cursor:pointer;font-size:.78em;font-weight:700;font-family:'Nunito',sans-serif;transition:all .2s}
+.tab:hover{border-color:rgba(255,255,255,.3)}
+.tab.active{color:#0a1a10;font-weight:800}
+.tab[data-sc="0"].active{background:var(--s0)}
+.tab[data-sc="1"].active{background:var(--s1)}
+.tab[data-sc="2"].active{background:var(--s2)}
+.tab[data-sc="3"].active{background:var(--s3)}
+.photo-input{flex:1;min-width:180px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--crema);padding:5px 10px;border-radius:6px;font-size:.8em;font-family:'Nunito',sans-serif}
+.photo-input:focus{outline:none;border-color:var(--verde)}
+.top-actions{display:flex;gap:6px;align-items:center}
+.top-actions button{padding:5px 12px;border:none;border-radius:6px;cursor:pointer;font-size:.78em;font-weight:700;font-family:'Nunito',sans-serif;transition:opacity .2s}
+.btn-add{background:var(--verde);color:#0a1a10}
+.btn-export{background:var(--arena);color:#0a1a10}
+.btn-clear{background:transparent;border:1px solid rgba(255,255,255,.15)!important;color:var(--crema)}
+.btn-clear:hover{border-color:var(--rojo)!important;color:var(--rojo)}
+.mode-indicator{font-size:.72em;color:rgba(255,255,255,.4);margin-left:6px;white-space:nowrap}
+
+/* ── Main layout ── */
+#main{display:flex;flex:1;overflow:hidden}
+#panel-left{width:230px;background:var(--panel);border-right:1px solid rgba(255,255,255,.06);overflow-y:auto;flex-shrink:0}
+#panel-left h3{padding:10px 12px;font-size:.82em;color:var(--verde);font-family:'Baloo 2',cursive;border-bottom:1px solid rgba(255,255,255,.06)}
+#panel-center{flex:1;position:relative;background:#000}
+#panel-right{width:290px;background:var(--panel);border-left:1px solid rgba(255,255,255,.06);overflow-y:auto;flex-shrink:0;padding:14px}
+
+/* ── Species list items ── */
+.sp-item{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+.sp-item:hover{background:rgba(255,255,255,.04)}
+.sp-item.selected{background:rgba(74,158,142,.15);border-left:3px solid var(--verde)}
+.sp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-aves{background:var(--azul)}.dot-anfibios{background:#6dcf7a}.dot-reptiles{background:var(--arena)}
+.sp-thumb{width:34px;height:34px;object-fit:contain;flex-shrink:0;background:rgba(255,255,255,.03);border-radius:4px}
+.sp-info{flex:1;min-width:0}
+.sp-name{font-weight:700;font-size:.82em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-sci{font-style:italic;font-size:.7em;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scene-badges{display:flex;gap:3px;margin-top:4px}
+.s-badge{width:18px;height:16px;border-radius:3px;font-size:.55em;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;border:1px solid transparent;opacity:.3}
+.s-badge.assigned{opacity:1}
+.s-badge[data-sc="0"]{background:var(--s0);color:#0a1a10}
+.s-badge[data-sc="1"]{background:var(--s1);color:#0a1a10}
+.s-badge[data-sc="2"]{background:var(--s2);color:#0a1a10}
+.s-badge[data-sc="3"]{background:var(--s3);color:#0a1a10}
+
+/* ── A-Frame ── */
+#panel-center a-scene{width:100%!important;height:100%!important}
+#panel-center a-scene canvas{width:100%!important;height:100%!important}
+#coords{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(10,22,15,.85);backdrop-filter:blur(6px);padding:4px 14px;border-radius:6px;font-size:.72em;color:var(--verde);font-family:monospace;pointer-events:none;opacity:0;transition:opacity .2s}
+#coords.visible{opacity:1}
+#drag-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,22,15,.8);padding:8px 16px;border-radius:8px;font-size:.8em;color:var(--crema);pointer-events:none;opacity:0;transition:opacity .2s}
+#drag-hint.visible{opacity:1}
+
+/* ── Properties panel ── */
+#props-content h3{font-family:'Baloo 2',cursive;color:var(--verde);font-size:.9em;margin-bottom:12px}
+.prop-group{margin-bottom:10px}
+.prop-group label{display:block;font-size:.7em;color:rgba(255,255,255,.4);margin-bottom:3px;font-weight:700}
+.prop-group input[type="text"],.prop-group input[type="number"],.prop-group select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--crema);padding:5px 8px;border-radius:5px;font-size:.8em;font-family:'Nunito',sans-serif}
+.prop-group input:focus,.prop-group select:focus{outline:none;border-color:var(--verde)}
+.prop-group select{cursor:pointer}
+.row-3{display:flex;gap:5px}
+.row-3 input{flex:1}
+.slider-row{display:flex;align-items:center;gap:8px}
+.slider-row input[type="range"]{flex:1;accent-color:var(--verde)}
+.slider-val{font-size:.75em;color:var(--verde);min-width:40px;text-align:right}
+.scene-assign{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.scene-check{display:flex;align-items:center;gap:4px;font-size:.75em;cursor:pointer}
+.scene-check input{accent-color:var(--verde)}
+.btn-delete{background:var(--rojo);color:#fff;border:none;padding:7px;border-radius:6px;cursor:pointer;font-size:.8em;font-weight:700;width:100%;margin-top:10px;font-family:'Nunito',sans-serif}
+.btn-delete:hover{opacity:.85}
+.no-selection{color:rgba(255,255,255,.3);font-size:.85em;font-style:italic;text-align:center;margin-top:40px}
+
+/* ── Modals ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999}
+.modal-overlay.hidden{display:none}
+.modal{background:#0f1f14;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:24px;width:min(440px,92vw);max-height:82vh;overflow-y:auto}
+.modal h3{font-family:'Baloo 2',cursive;color:var(--verde);margin-bottom:16px;font-size:1.1em}
+.modal .prop-group{margin-bottom:10px}
+.modal .scene-assign{flex-wrap:wrap}
+.modal-buttons{display:flex;gap:8px;margin-top:16px}
+.modal-buttons button{flex:1;padding:8px;border:none;border-radius:6px;cursor:pointer;font-size:.85em;font-weight:700;font-family:'Nunito',sans-serif}
+.btn-cancel{background:transparent;border:1px solid rgba(255,255,255,.15)!important;color:var(--crema)}
+.btn-confirm{background:var(--verde);color:#0a1a10}
+#export-area{width:100%;min-height:220px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--crema);font-family:monospace;font-size:.72em;padding:10px;border-radius:8px;resize:vertical;line-height:1.5}
+.copy-msg{color:var(--verde);font-size:.8em;font-weight:700;text-align:center;margin-top:8px;opacity:0;transition:opacity .3s}
+.copy-msg.show{opacity:1}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ═══ Top bar ═══ -->
+<div id="topbar">
+  <span class="logo">🌿 Editor</span>
+  <div class="scene-tabs" id="scene-tabs">
+    <button class="tab active" data-sc="0" onclick="switchScene(0)">🟢 Ciénega viva</button>
+    <button class="tab" data-sc="1" onclick="switchScene(1)">🟡 Potrero</button>
+    <button class="tab" data-sc="2" onclick="switchScene(2)">🟠 Descarga</button>
+    <button class="tab" data-sc="3" onclick="switchScene(3)">🔴 Orilla</button>
+  </div>
+  <input class="photo-input" id="photo-url" type="text" placeholder="Ruta foto 360°">
+  <div class="top-actions">
+    <button class="btn-add" onclick="openAddModal()">+ Agregar</button>
+    <button class="btn-export" onclick="openExportModal()">⬇ Exportar JSON</button>
+    <button class="btn-clear" onclick="clearAll()">🗑 Limpiar</button>
+  </div>
+  <span class="mode-indicator" id="mode-label">🎥 Cámara</span>
+</div>
+
+<!-- ═══ Main ═══ -->
+<div id="main">
+  <!-- Left -->
+  <div id="panel-left">
+    <h3>Especies (<span id="sp-count">0</span>)</h3>
+    <div id="sp-list"></div>
+  </div>
+
+  <!-- Center -->
+  <div id="panel-center">
+    <a-scene embedded vr-mode-ui="enabled:false" renderer="antialias:true;alpha:false;colorManagement:true" loading-screen="enabled:false">
+      <a-sky id="vs" src="assets/360/escena_0.jpg" rotation="0 -90 0"></a-sky>
+      <a-entity id="cam-ed" camera="active:true" look-controls="enabled:true" position="0 0 0">
+        <a-cursor color="#4a9e8e" opacity="0.35" fuse="false"></a-cursor>
+      </a-entity>
+    </a-scene>
+    <div id="coords"></div>
+    <div id="drag-hint">Modo arrastre — mantén D</div>
+  </div>
+
+  <!-- Right -->
+  <div id="panel-right">
+    <div id="props-content">
+      <p class="no-selection">← Selecciona una especie</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Add species ═══ -->
+<div class="modal-overlay hidden" id="modal-add">
+  <div class="modal">
+    <h3>Agregar nueva especie</h3>
+    <div class="prop-group"><label>Nombre común *</label><input type="text" id="a-nombre"></div>
+    <div class="prop-group"><label>Nombre científico</label><input type="text" id="a-cientifico"></div>
+    <div class="prop-group"><label>Grupo</label>
+      <select id="a-grupo"><option value="aves">🐦 Aves</option><option value="anfibios">🐸 Anfibios</option><option value="reptiles">🦎 Reptiles</option></select>
+    </div>
+    <div class="prop-group"><label>Ruta imagen *</label><input type="text" id="a-imagen" placeholder="assets/Imagenes/Anas_diazi.webp"></div>
+    <div class="prop-group"><label>Ruta audio</label><input type="text" id="a-audio" placeholder="assets/Sonidos/Anas_diazi.mp3"></div>
+    <div class="prop-group"><label>Escenas iniciales</label>
+      <div class="scene-assign">
+        <label class="scene-check"><input type="checkbox" id="a-e0" checked> <span style="color:var(--s0)">E0</span></label>
+        <label class="scene-check"><input type="checkbox" id="a-e1"> <span style="color:var(--s1)">E1</span></label>
+        <label class="scene-check"><input type="checkbox" id="a-e2"> <span style="color:var(--s2)">E2</span></label>
+        <label class="scene-check"><input type="checkbox" id="a-e3"> <span style="color:var(--s3)">E3</span></label>
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="addSpecies()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Export ═══ -->
+<div class="modal-overlay hidden" id="modal-export">
+  <div class="modal">
+    <h3>Exportar especies.json</h3>
+    <textarea id="export-area" readonly></textarea>
+    <div class="copy-msg" id="copy-msg">¡Copiado!</div>
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closeExportModal()">Cerrar</button>
+      <button class="btn-confirm" onclick="copyExport()">📋 Copiar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   CIÉNEGAS DE LERMA — EDITOR DE ESPECIES
+   python3 -m http.server 8000
+   ═══════════════════════════════════════ */
+
+let especies = [];
+let selId = null;
+let escenaActiva = 0;
+let dragMode = false;
+let isDragging = false;
+const rutasFoto = [
+  'assets/360/escena_0.jpg',
+  'assets/360/escena_1.jpg',
+  'assets/360/escena_2.jpg',
+  'assets/360/escena_3.jpg'
+];
+const SCENE_COLORS = ['#6fcf97','#f2c94c','#f2994a','#eb5757'];
+const SCENE_NAMES = ['Ciénega viva','Potrero avanza','La descarga','Orilla urbanizada'];
+const GROUP_COLORS = {aves:'#4db8e8',anfibios:'#6dcf7a',reptiles:'#e8a84d'};
+
+// ── A-Frame: custom look-at ──
+AFRAME.registerComponent('look-at-target',{
+  schema:{type:'selector'},
+  tick:function(){
+    if(!this.data) return;
+    const cam=this.data.object3D;
+    const sp=this.el.object3D;
+    const worldPos=new THREE.Vector3();
+    cam.getWorldPosition(worldPos);
+    sp.lookAt(worldPos);
+  }
+});
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('photo-url').value=rutasFoto[escenaActiva];
+  renderAll();
+  document.getElementById('photo-url').addEventListener('input',function(){
+    rutasFoto[escenaActiva]=this.value;
+    document.getElementById('vs').setAttribute('src',this.value);
+  });
+});
+
+// ── Scene switching ──
+function switchScene(n){
+  escenaActiva=n;
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.classList.toggle('active',parseInt(t.dataset.sc)===n);
+  });
+  document.getElementById('photo-url').value=rutasFoto[n];
+  document.getElementById('vs').setAttribute('src',rutasFoto[n]);
+  updateOpacities();
+  renderListBadges();
+  updatePropsScenes();
+}
+
+// ── Render all ──
+function renderAll(){
+  renderList();
+  renderSceneEntities();
+  updateOpacities();
+  renderProps();
+  document.getElementById('sp-count').textContent=especies.length;
+}
+
+// ── Render left list ──
+function renderList(){
+  const list=document.getElementById('sp-list');
+  list.innerHTML='';
+  especies.forEach(sp=>{
+    const div=document.createElement('div');
+    div.className='sp-item'+(sp.id===selId?' selected':'');
+    const escenas=sp.escenas||[0];
+    const badges=[0,1,2,3].map(i=>`<div class="s-badge ${escenas.includes(i)?'assigned':''}" data-sp="${sp.id}" data-sc="${i}" onclick="event.stopPropagation();toggleScene('${sp.id}',${i})">E${i}</div>`).join('');
+    div.innerHTML=`
+      <div class="sp-dot dot-${sp.grupo}"></div>
+      <img class="sp-thumb" src="${sp.imagen}" alt="${sp.nombre}" onerror="this.style.display='none'">
+      <div class="sp-info">
+        <div class="sp-name">${sp.nombre}</div>
+        <div class="sp-sci">${sp.cientifico||''}</div>
+        <div class="scene-badges">${badges}</div>
+      </div>`;
+    div.addEventListener('click',()=>selectSpecies(sp.id));
+    list.appendChild(div);
+  });
+}
+
+function renderListBadges(){
+  document.querySelectorAll('.s-badge').forEach(b=>{
+    const spId=b.dataset.sp;
+    const sc=parseInt(b.dataset.sc);
+    const sp=especies.find(s=>s.id===spId);
+    if(!sp) return;
+    const assigned=(sp.escenas||[0]).includes(sc);
+    b.classList.toggle('assigned',assigned);
+  });
+}
+
+// ── Toggle scene assignment from badge ──
+function toggleScene(spId,scIdx){
+  const sp=especies.find(s=>s.id===spId);
+  if(!sp) return;
+  if(!sp.escenas) sp.escenas=[0];
+  const idx=sp.escenas.indexOf(scIdx);
+  if(idx>=0) sp.escenas.splice(idx,1);
+  else sp.escenas.push(scIdx);
+  if(sp.escenas.length===0) sp.escenas=[0];
+  renderAll();
+}
+
+// ── Render A-Frame entities ──
+function renderSceneEntities(){
+  const scene=document.querySelector('#panel-center a-scene');
+  document.querySelectorAll('#panel-center a-scene a-image').forEach(el=>el.remove());
+  const cam=document.getElementById('cam-ed');
+  especies.forEach(sp=>{
+    const img=document.createElement('a-image');
+    img.setAttribute('id','img-'+sp.id);
+    img.setAttribute('src',sp.imagen);
+    img.setAttribute('position',`${sp.px} ${sp.py} ${sp.pz}`);
+    img.setAttribute('scale',`${sp.sx} ${sp.sy} 1`);
+    img.setAttribute('transparent','true');
+    img.setAttribute('alpha-test','0.5');
+    img.setAttribute('look-at-target','#cam-ed');
+    img.setAttribute('data-sp-id',sp.id);
+    img.addEventListener('click',(e)=>{
+      if(!dragMode) selectSpecies(sp.id);
+    });
+    scene.appendChild(img);
+  });
+  updateOpacities();
+  highlightSelected();
+}
+
+// ── Update opacities based on current scene ──
+function updateOpacities(){
+  especies.forEach(sp=>{
+    const el=document.getElementById('img-'+sp.id);
+    if(!el) return;
+    const assigned=(sp.escenas||[0]).includes(escenaActiva);
+    el.setAttribute('opacity',assigned?'1':'0.25');
+  });
+}
+
+// ── Highlight selected ──
+function highlightSelected(){
+  especies.forEach(sp=>{
+    const el=document.getElementById('img-'+sp.id);
+    if(!el) return;
+    if(sp.id===selId){
+      el.setAttribute('scale',`${sp.sx*1.2} ${sp.sy*1.2} 1`);
+    } else {
+      el.setAttribute('scale',`${sp.sx} ${sp.sy} 1`);
+    }
+  });
+}
+
+// ── Select species ──
+function selectSpecies(id){
+  selId=id;
+  renderList();
+  highlightSelected();
+  renderProps();
+  updateCoordsDisplay();
+}
+
+// ── Render properties panel ──
+function renderProps(){
+  const cont=document.getElementById('props-content');
+  const sp=especies.find(s=>s.id===selId);
+  if(!sp){
+    cont.innerHTML='<p class="no-selection">← Selecciona una especie</p>';
+    return;
+  }
+  const escenas=sp.escenas||[0];
+  const checks=[0,1,2,3].map(i=>`<label class="scene-check"><input type="checkbox" ${escenas.includes(i)?'checked':''} onchange="updateProp('${sp.id}','escena',${i},this.checked)"> <span style="color:${SCENE_COLORS[i]}">E${i} ${SCENE_NAMES[i]}</span></label>`).join('');
+  cont.innerHTML=`
+    <h3>Propiedades</h3>
+    <div class="prop-group"><label>Nombre común</label><input type="text" value="${sp.nombre}" oninput="updateProp('${sp.id}','nombre',this.value)"></div>
+    <div class="prop-group"><label>Nombre científico</label><input type="text" value="${sp.cientifico||''}" oninput="updateProp('${sp.id}','cientifico',this.value)"></div>
+    <div class="prop-group"><label>Grupo</label>
+      <select onchange="updateProp('${sp.id}','grupo',this.value)">
+        <option value="aves" ${sp.grupo==='aves'?'selected':''}>🐦 Aves</option>
+        <option value="anfibios" ${sp.grupo==='anfibios'?'selected':''}>🐸 Anfibios</option>
+        <option value="reptiles" ${sp.grupo==='reptiles'?'selected':''}>🦎 Reptiles</option>
+      </select>
+    </div>
+    <div class="prop-group"><label>Posición XYZ</label>
+      <div class="row-3">
+        <input type="number" step="0.1" value="${sp.px}" id="prop-x" oninput="updatePos('${sp.id}','x',parseFloat(this.value))">
+        <input type="number" step="0.1" value="${sp.py}" id="prop-y" oninput="updatePos('${sp.id}','y',parseFloat(this.value))">
+        <input type="number" step="0.1" value="${sp.pz}" id="prop-z" oninput="updatePos('${sp.id}','z',parseFloat(this.value))">
+      </div>
+    </div>
+    <div class="prop-group"><label>Tamaño</label>
+      <div class="slider-row">
+        <input type="range" min="0.3" max="6" step="0.1" value="${sp.sx}" oninput="updateScale('${sp.id}',parseFloat(this.value))">
+        <span class="slider-val" id="scale-val">${sp.sx.toFixed(1)}×</span>
+      </div>
+    </div>
+    <div class="prop-group"><label>Volumen</label>
+      <div class="slider-row">
+        <input type="range" min="0" max="1" step="0.05" value="${sp.volumen}" oninput="updateProp('${sp.id}','volumen',parseFloat(this.value));this.nextElementSibling.textContent=Math.round(parseFloat(this.value)*100)+'%'">
+        <span class="slider-val">${Math.round(sp.volumen*100)}%</span>
+      </div>
+    </div>
+    <div class="prop-group"><label>Ruta imagen</label><input type="text" value="${sp.imagen}" oninput="updateProp('${sp.id}','imagen',this.value)"></div>
+    <div class="prop-group"><label>Ruta audio</label><input type="text" value="${sp.audio||''}" oninput="updateProp('${sp.id}','audio',this.value)"></div>
+    <div class="prop-group"><label>Escenas asignadas</label>
+      <div class="scene-assign">${checks}</div>
+    </div>
+    <button class="btn-delete" onclick="deleteSpecies('${sp.id}')">✕ Eliminar</button>`;
+}
+
+function updatePropsScenes(){
+  const sp=especies.find(s=>s.id===selId);
+  if(!sp) return;
+  const cont=document.getElementById('props-content');
+  const checks=cont.querySelectorAll('.scene-check input[type=checkbox]');
+  if(checks.length===4){
+    checks.forEach((cb,i)=>{
+      cb.checked=(sp.escenas||[0]).includes(i);
+    });
+  }
+}
+
+// ── Update property ──
+function updateProp(id,key,val){
+  const sp=especies.find(s=>s.id===id);
+  if(!sp) return;
+  if(key==='escena'){
+    if(!sp.escenas) sp.escenas=[0];
+    if(val){
+      if(!sp.escenas.includes(val)) sp.escenas.push(val);
+    } else {
+      sp.escenas=sp.escenas.filter(e=>e!==val);
+      if(sp.escenas.length===0) sp.escenas=[0];
+    }
+    updateOpacities();
+    renderListBadges();
+  } else if(key==='imagen'){
+    sp[key]=val;
+    const el=document.getElementById('img-'+id);
+    if(el) el.setAttribute('src',val);
+  } else {
+    sp[key]=val;
+  }
+}
+
+function updatePos(id,axis,val){
+  const sp=especies.find(s=>s.id===id);
+  if(!sp) return;
+  if(axis==='x') sp.px=val;
+  else if(axis==='y') sp.py=val;
+  else sp.pz=val;
+  const el=document.getElementById('img-'+id);
+  if(el) el.setAttribute('position',`${sp.px} ${sp.py} ${sp.pz}`);
+  updateCoordsDisplay();
+}
+
+function updateScale(id,val){
+  const sp=especies.find(s=>s.id===id);
+  if(!sp) return;
+  sp.sx=val; sp.sy=val;
+  const el=document.getElementById('img-'+id);
+  if(el) el.setAttribute('scale',`${sp.sx} ${sp.sy} 1`);
+  const sv=document.getElementById('scale-val');
+  if(sv) sv.textContent=val.toFixed(1)+'×';
+  highlightSelected();
+}
+
+function deleteSpecies(id){
+  if(!confirm('¿Eliminar esta especie?')) return;
+  especies=especies.filter(s=>s.id!==id);
+  if(selId===id) selId=null;
+  renderAll();
+}
+
+// ── Coordinate display ──
+function updateCoordsDisplay(){
+  const el=document.getElementById('coords');
+  const sp=especies.find(s=>s.id===selId);
+  if(!sp){el.classList.remove('visible');return;}
+  el.textContent=`x: ${sp.px.toFixed(2)} · y: ${sp.py.toFixed(2)} · z: ${sp.pz.toFixed(2)}`;
+  el.classList.add('visible');
+}
+
+// ── Drag mode ──
+document.addEventListener('keydown',e=>{
+  if(e.key==='d'||e.key==='D'){
+    dragMode=true;
+    document.getElementById('mode-label').textContent='🖱️ Arrastre';
+    document.getElementById('drag-hint').classList.add('visible');
+    const cam=document.querySelector('#cam-ed');
+    if(cam) cam.setAttribute('look-controls','enabled:false');
+  }
+});
+document.addEventListener('keyup',e=>{
+  if(e.key==='d'||e.key==='D'){
+    dragMode=false;
+    isDragging=false;
+    document.getElementById('mode-label').textContent='🎥 Cámara';
+    document.getElementById('drag-hint').classList.remove('visible');
+    const cam=document.querySelector('#cam-ed');
+    if(cam) cam.setAttribute('look-controls','enabled:true');
+  }
+});
+
+// Drag with mouse
+const panelCenter=document.getElementById('panel-center');
+panelCenter.addEventListener('mousedown',e=>{
+  if(!dragMode||!selId) return;
+  isDragging=true;
+  e.preventDefault();
+});
+
+panelCenter.addEventListener('mousemove',e=>{
+  if(!isDragging||!selId) return;
+  const sp=especies.find(s=>s.id===selId);
+  if(!sp) return;
+  const rect=panelCenter.getBoundingClientRect();
+  const nx=(e.clientX-rect.left)/rect.width-0.5;
+  const ny=(e.clientY-rect.top)/rect.height-0.5;
+  sp.px=parseFloat((nx*18).toFixed(2));
+  sp.pz=parseFloat((-5-ny*12).toFixed(2));
+  const el=document.getElementById('img-'+selId);
+  if(el) el.setAttribute('position',`${sp.px} ${sp.py} ${sp.pz}`);
+  updateCoordsDisplay();
+  const px=document.getElementById('prop-x');
+  const pz=document.getElementById('prop-z');
+  if(px) px.value=sp.px;
+  if(pz) pz.value=sp.pz;
+});
+
+panelCenter.addEventListener('mouseup',()=>{isDragging=false;});
+panelCenter.addEventListener('mouseleave',()=>{isDragging=false;});
+
+// Scroll changes Y
+panelCenter.addEventListener('wheel',e=>{
+  if(!selId) return;
+  e.preventDefault();
+  const sp=especies.find(s=>s.id===selId);
+  if(!sp) return;
+  sp.py=parseFloat((sp.py+(e.deltaY<0?0.25:-0.25)).toFixed(2));
+  const el=document.getElementById('img-'+selId);
+  if(el) el.setAttribute('position',`${sp.px} ${sp.py} ${sp.pz}`);
+  updateCoordsDisplay();
+  const py=document.getElementById('prop-y');
+  if(py) py.value=sp.py;
+},{passive:false});
+
+// ── Modal: Add ──
+function openAddModal(){document.getElementById('modal-add').classList.remove('hidden');}
+function closeAddModal(){document.getElementById('modal-add').classList.add('hidden');}
+function addSpecies(){
+  const nombre=document.getElementById('a-nombre').value.trim();
+  const imagen=document.getElementById('a-imagen').value.trim();
+  if(!nombre||!imagen){alert('Nombre y ruta de imagen son obligatorios.');return;}
+  const escenas=[];
+  for(let i=0;i<4;i++){
+    if(document.getElementById('a-e'+i).checked) escenas.push(i);
+  }
+  if(escenas.length===0) escenas.push(0);
+  const sp={
+    id:'esp_'+Date.now(),
+    nombre,
+    cientifico:document.getElementById('a-cientifico').value.trim(),
+    grupo:document.getElementById('a-grupo').value,
+    imagen,
+    audio:document.getElementById('a-audio').value.trim(),
+    px:0, py:0, pz:-5,
+    sx:2, sy:2,
+    volumen:1,
+    escenas
+  };
+  especies.push(sp);
+  closeAddModal();
+  renderAll();
+  selectSpecies(sp.id);
+  document.getElementById('a-nombre').value='';
+  document.getElementById('a-cientifico').value='';
+  document.getElementById('a-imagen').value='';
+  document.getElementById('a-audio').value='';
+  document.getElementById('a-e0').checked=true;
+  document.getElementById('a-e1').checked=false;
+  document.getElementById('a-e2').checked=false;
+  document.getElementById('a-e3').checked=false;
+}
+
+// ── Modal: Export ──
+function openExportModal(){
+  const out=especies.map(e=>({
+    id:e.id,
+    nombre:e.nombre,
+    cientifico:e.cientifico||'',
+    grupo:e.grupo,
+    imagen:e.imagen,
+    audio:e.audio||'',
+    posicion:`${e.px} ${e.py} ${e.pz}`,
+    escala:`${e.sx} ${e.sy} 1`,
+    volumen:e.volumen,
+    escenas:e.escenas||[0]
+  }));
+  document.getElementById('export-area').value=JSON.stringify(out,null,2);
+  document.getElementById('modal-export').classList.remove('hidden');
+  document.getElementById('copy-msg').classList.remove('show');
+}
+function closeExportModal(){document.getElementById('modal-export').classList.add('hidden');}
+function copyExport(){
+  const ta=document.getElementById('export-area');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    const msg=document.getElementById('copy-msg');
+    msg.classList.add('show');
+    setTimeout(()=>msg.classList.remove('show'),2000);
+  }).catch(()=>{
+    document.execCommand('copy');
+    const msg=document.getElementById('copy-msg');
+    msg.classList.add('show');
+    setTimeout(()=>msg.classList.remove('show'),2000);
+  });
+}
+
+// ── Clear all ──
+function clearAll(){
+  if(!confirm('¿Eliminar TODAS las especies? Esta acción no se puede deshacer.')) return;
+  especies=[];
+  selId=null;
+  renderAll();
+}
+</script>
+</body>
+</html>
+

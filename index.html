@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Paisaje Sonoro Interactivo — Ciénegas de Lerma</title>
+<!-- Ejecutar con: python3 -m http.server 8000 → abrir http://localhost:8000 -->
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+<link href="https://fontsource.org/fonts/inter/css.css" rel="stylesheet">
+<style>
+:root {
+  --c-water:  #0d4f6e;
+  --c-green:  #1a5c2a;
+  --c-amber:  #c47a1e;
+  --c-red:    #8b1a1a;
+  --c-white:  #f5f0e8;
+  --c-panel:  rgba(10,30,20,0.88);
+  --c-accent: #a8d8b0;
+  --c-vivid:  #6fcf97;
+  --font-display: 'Georgia', serif;
+  --font-body:    'Inter', 'Trebuchet MS', sans-serif;
+  --transition:   0.7s cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a1a12;
+  color: var(--c-white);
+  font-family: var(--font-body);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ── Loading Screen ── */
+#loading-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0a1a12;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.6s ease;
+}
+#loading-screen.hidden { opacity: 0; pointer-events: none; }
+.spinner {
+  width: 60px; height: 60px;
+  border: 4px solid rgba(168,216,176,0.2);
+  border-top-color: var(--c-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+#loading-screen p { margin-top: 1.2rem; font-size: 1.1rem; opacity: 0.8; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Pretraining ── */
+#pretraining {
+  position: fixed; inset: 0; z-index: 9000;
+  background: linear-gradient(160deg, #0a1a12 0%, #0d2f1a 40%, #0d4f6e 100%);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem;
+}
+#pretraining.active { display: flex; }
+.slide-container {
+  position: relative; width: 100%; max-width: 700px;
+  min-height: 400px;
+}
+.slide {
+  display: none; flex-direction: column;
+  align-items: center; text-align: center;
+  gap: 1.2rem;
+  animation: fadeIn 0.5s ease;
+}
+.slide.active { display: flex; }
+.slide h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--c-accent);
+}
+.slide p {
+  font-size: 1.05rem; line-height: 1.6;
+  max-width: 600px;
+}
+.slide-buttons { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; justify-content: center; }
+.btn-primary {
+  background: var(--c-vivid);
+  color: #0a1a12;
+  border: none; padding: 0.75rem 2rem;
+  border-radius: 8px; font-size: 1.1rem;
+  font-weight: 600; cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+.btn-primary:hover { transform: scale(1.05); background: #8ee0b5; }
+.btn-secondary {
+  background: transparent;
+  color: var(--c-accent);
+  border: 1px solid var(--c-accent);
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px; font-size: 0.9rem;
+  cursor: pointer; opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.btn-secondary:hover { opacity: 1; }
+.card-row { display: flex; gap: 1rem; width: 100%; flex-wrap: wrap; justify-content: center; }
+.sound-card {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px; padding: 1.2rem;
+  flex: 1; min-width: 180px; max-width: 220px;
+  text-align: center;
+}
+.sound-card .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+.sound-card h4 { font-family: var(--font-display); margin-bottom: 0.4rem; }
+.sound-card p { font-size: 0.85rem; line-height: 1.4; }
+.scene-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.8rem; width: 100%;
+}
+.scene-card {
+  border-radius: 10px; padding: 1rem;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.scene-card h4 { font-family: var(--font-display); margin-bottom: 0.3rem; }
+.scene-card p { font-size: 0.8rem; line-height: 1.35; }
+.species-line { font-size: 0.95rem; opacity: 0.8; margin-top: 0.5rem; }
+.dots { display: flex; gap: 0.6rem; margin-top: 1.5rem; }
+.dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.3); cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.dot.active { background: var(--c-accent); transform: scale(1.3); }
+.dot:hover { background: rgba(255,255,255,0.6); }
+.note { font-size: 0.8rem; opacity: 0.6; margin-top: 0.5rem; font-style: italic; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Scene Transition Overlay ── */
+#scene-overlay {
+  position: fixed; inset: 0; z-index: 8000;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+#scene-overlay.fade {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── Main HUD ── */
+#hud {
+  display: none;
+  position: fixed; inset: 0; z-index: 7000;
+  pointer-events: none;
+}
+#hud.active { display: block; }
+#hud > * { pointer-events: auto; }
+
+/* Topbar */
+#topbar {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 52px;
+  background: rgba(10,30,20,0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center;
+  padding: 0 1rem; gap: 0.8rem;
+  z-index: 10;
+}
+#topbar .logo {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--c-accent);
+  white-space: nowrap;
+}
+.scene-btns { display: flex; gap: 0.4rem; flex: 1; justify-content: center; }
+.scene-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--c-white);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.scene-btn.active { background: rgba(168,216,176,0.25); border-color: var(--c-vivid); color: var(--c-vivid); }
+.scene-btn:hover { background: rgba(255,255,255,0.15); }
+.bio-meter {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-size: 0.85rem; white-space: nowrap;
+}
+.bio-meter label { text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; }
+.bio-bar-outer {
+  width: 160px; height: 12px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 5px; overflow: hidden;
+}
+.bio-bar-inner {
+  height: 100%; width: 100%;
+  background: var(--c-vivid);
+  border-radius: 5px;
+  transition: width 1s ease, background 1s ease;
+}
+.bio-pct { font-weight: 700; min-width: 40px; text-align: right; transition: color 1s ease; font-size: 0.95rem; }
+
+/* Compare bar */
+#compare-bar {
+  position: absolute; top: 56px; left: 1rem; transform: none;
+  display: flex; flex-direction: column; gap: 0.55rem;
+  opacity: 0; transition: opacity 1.5s ease;
+  z-index: 5;
+  background: rgba(8,24,14,0.93);
+  border: 1px solid rgba(168,216,176,0.18);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  backdrop-filter: blur(8px);
+}
+#compare-bar.visible { opacity: 1; }
+.cmp-block {
+  display: flex; flex-direction: row; align-items: center; gap: 0.6rem;
+}
+.cmp-label { font-size: 0.82rem; opacity: 0.85; min-width: 52px; color: var(--c-accent); }
+.cmp-bar-wrap {
+  width: 80px; height: 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 5px; overflow: hidden;
+  display: flex; align-items: center;
+}
+.cmp-bar-fill {
+  height: 100%;
+  background: var(--c-vivid);
+  transition: background 0.5s, width 0.5s;
+  border-radius: 5px;
+}
+.cmp-pct { font-size: 0.88rem; font-weight: 700; min-width: 36px; }
+
+/* Threat card */
+#threat-card {
+  position: absolute;
+  top: 80px; left: 50%; transform: translateX(-50%);
+  width: 90%; max-width: 520px;
+  background: var(--c-panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 1.2rem 1.5rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.6s ease;
+  max-height: 50vh; overflow-y: auto;
+}
+#threat-card.visible { opacity: 1; pointer-events: auto; }
+#threat-card .close-btn {
+  position: absolute; top: 0.6rem; right: 0.8rem;
+  background: none; border: none;
+  color: var(--c-white); font-size: 1.3rem;
+  cursor: pointer; opacity: 0.6;
+}
+#threat-card .close-btn:hover { opacity: 1; }
+#threat-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin-bottom: 0.6rem;
+  padding-right: 1.5rem;
+}
+#threat-card .body { font-size: 0.9rem; line-height: 1.55; margin-bottom: 0.6rem; }
+#threat-card .dato {
+  font-size: 0.78rem;
+  opacity: 0.55;
+  font-style: italic;
+  margin-bottom: 0.6rem;
+  line-height: 1.4;
+}
+#threat-card .reflexion {
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  color: var(--c-accent);
+}
+
+/* Species card */
+#species-card {
+  position: absolute;
+  bottom: 80px; right: 1.5rem;
+  width: 320px; max-width: 85vw;
+  background: var(--c-panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 1.2rem;
+  opacity: 0; pointer-events: none;
+  transform: translateX(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  max-height: 55vh; overflow-y: auto;
+}
+#species-card.visible {
+  opacity: 1; pointer-events: auto;
+  transform: translateX(0);
+}
+#species-card .close-btn {
+  position: absolute; top: 0.6rem; right: 0.8rem;
+  background: none; border: none;
+  color: var(--c-white); font-size: 1.3rem;
+  cursor: pointer; opacity: 0.6;
+}
+#species-card .close-btn:hover { opacity: 1; }
+#species-card .sp-header {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin-bottom: 0.2rem;
+}
+#species-card .sp-scientific {
+  font-size: 0.85rem;
+  font-style: italic;
+  opacity: 0.5;
+  margin-bottom: 0.8rem;
+}
+#species-card .sp-desc {
+  font-size: 0.9rem; line-height: 1.55;
+  margin-bottom: 0.6rem;
+}
+#species-card .sp-role {
+  font-size: 0.85rem; line-height: 1.45;
+  background: rgba(168,216,176,0.08);
+  border-radius: 8px; padding: 0.6rem 0.8rem;
+}
+/* Variante de presión antrópica */
+#species-card.amenaza {
+  border-color: rgba(220,80,60,0.45);
+  background: rgba(30,10,10,0.92);
+}
+#species-card.amenaza .sp-header { color: #e87c5a; }
+#species-card.amenaza .sp-scientific {
+  font-style: normal;
+  color: #e87c5a;
+  opacity: 0.9;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+#species-card.amenaza .sp-role {
+  background: rgba(220,80,60,0.1);
+  border-left: 3px solid rgba(220,80,60,0.5);
+  border-radius: 0 8px 8px 0;
+}
+
+/* Flash */
+.flash-popup {
+  position: fixed; z-index: 7500;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(10,40,20,0.95);
+  border: 2px solid var(--c-vivid);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  text-align: center;
+  animation: flashIn 0.5s ease forwards;
+  max-width: 340px;
+}
+.flash-popup .flash-title { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 0.4rem; color: var(--c-vivid); }
+.flash-popup .flash-role { font-size: 0.85rem; line-height: 1.45; opacity: 0.8; }
+@keyframes flashIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes flashOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* Sound panel */
+#sound-toggle {
+  position: fixed; top: 80px; right: 1rem;
+  z-index: 7200;
+  background: var(--c-panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+#sound-panel {
+  position: fixed; top: 128px; right: 1rem;
+  z-index: 7200;
+  width: 260px; max-height: 50vh;
+  background: var(--c-panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 1rem;
+  display: none;
+  overflow-y: auto;
+}
+#sound-panel.open { display: block; }
+.sound-row {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.85rem;
+}
+.sound-row:last-child { border: none; }
+.sound-row input[type="range"] { flex: 1; accent-color: var(--c-vivid); }
+
+/* Notebook */
+#nb-toggle {
+  position: fixed; bottom: 1rem; left: 1rem;
+  z-index: 7200;
+  background: var(--c-panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+#nb-panel {
+  position: fixed; bottom: 56px; left: 1rem;
+  z-index: 7200;
+  width: 340px; max-width: 90vw;
+  max-height: 60vh;
+  background: var(--c-panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 1.2rem;
+  display: none;
+  overflow-y: auto;
+}
+#nb-panel.open { display: block; }
+#nb-panel .close-btn {
+  position: absolute; top: 0.6rem; right: 0.8rem;
+  background: none; border: none;
+  color: var(--c-white); font-size: 1.3rem;
+  cursor: pointer; opacity: 0.6;
+}
+#nb-panel .close-btn:hover { opacity: 1; }
+#nb-panel h3 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 0.8rem; color: var(--c-accent); }
+.nb-entry {
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px; padding: 0.7rem;
+  margin-bottom: 0.6rem;
+}
+.nb-entry .scene-tag {
+  font-size: 0.7rem;
+  background: rgba(168,216,176,0.15);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  display: inline-block;
+  margin-bottom: 0.3rem;
+}
+.nb-entry .nb-name { font-family: var(--font-display); font-size: 0.95rem; margin-bottom: 0.3rem; }
+.nb-entry textarea {
+  width: 100%; min-height: 50px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: var(--c-white);
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  resize: vertical;
+}
+.nb-entry textarea::placeholder { opacity: 0.4; }
+.nb-empty { font-size: 0.85rem; opacity: 0.5; text-align: center; padding: 1rem 0; }
+
+/* Return button */
+#return-btn {
+  position: fixed; bottom: 1rem; right: 1rem;
+  z-index: 7200;
+  background: var(--c-panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--c-vivid);
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  color: var(--c-vivid);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: none;
+  transition: opacity 0.4s;
+}
+#return-btn.visible { display: block; }
+a-scene canvas { cursor: crosshair; }
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <p>Cargando la ciénega…</p>
+</div>
+
+<!-- Pretraining -->
+<div id="pretraining">
+  <div class="slide-container">
+    <!-- Slide 0 -->
+    <div class="slide active" data-slide="0">
+      <h2>Bienvenido a las Ciénegas de Lerma</h2>
+      <p>Este recorrido te permitirá escuchar cómo suena la ciénega cuando está en equilibrio… y cómo cambia cuando las actividades humanas la deterioran.</p>
+      <div class="slide-buttons">
+        <button class="btn-primary" onclick="nextSlide(1)">Siguiente →</button>
+      </div>
+    </div>
+    <!-- Slide 1 -->
+    <div class="slide" data-slide="1">
+      <h2>Los sonidos del ecosistema</h2>
+      <div class="card-row">
+        <div class="sound-card">
+          <div class="emoji">🐦</div>
+          <h4>Biofonía</h4>
+          <p>Sonidos producidos por seres vivos: cantos de aves, croar de ranas, llamados de mamíferos.</p>
+        </div>
+        <div class="sound-card">
+          <div class="emoji">🌊</div>
+          <h4>Geofonía</h4>
+          <p>Sonidos no biológicos: el viento entre los tulares, el agua corriente, la lluvia.</p>
+        </div>
+        <div class="sound-card">
+          <div class="emoji">🏗️</div>
+          <h4>Antropofonía</h4>
+          <p>Sonidos de la actividad humana: motores, maquinaria, música, tráfico.</p>
+        </div>
+      </div>
+      <p class="note">El Biofómetro en pantalla te mostrará cuánta vida sonora hay en cada escena.</p>
+      <div class="slide-buttons">
+        <button class="btn-secondary" onclick="nextSlide(0)">← Anterior</button>
+        <button class="btn-primary" onclick="nextSlide(2)">Siguiente →</button>
+      </div>
+    </div>
+    <!-- Slide 2 -->
+    <div class="slide" data-slide="2">
+      <h2>Las cuatro escenas</h2>
+      <p>Explorarás la misma ciénega en cuatro momentos distintos. Presta atención a cómo cambia el paisaje sonoro.</p>
+      <div class="scene-grid">
+        <div class="scene-card" style="background:rgba(111,207,151,0.15)">
+          <h4>🟢 1 — La ciénega viva</h4>
+          <p>La ciénega en equilibrio. Alta diversidad de especies. Biofonía al máximo.</p>
+        </div>
+        <div class="scene-card" style="background:rgba(242,201,76,0.15)">
+          <h4>🟡 2 — El potrero avanza</h4>
+          <p>La ganadería extensiva reemplaza los tulares. Varias especies desaparecen.</p>
+        </div>
+        <div class="scene-card" style="background:rgba(242,153,74,0.15)">
+          <h4>🟠 3 — La descarga</h4>
+          <p>Contaminación industrial y doméstica en el agua. La biofonía se silencia.</p>
+        </div>
+        <div class="scene-card" style="background:rgba(235,87,87,0.15)">
+          <h4>🔴 4 — La orilla urbanizada</h4>
+          <p>Expansión urbana en el borde del humedal. Casi nada queda del paisaje original.</p>
+        </div>
+      </div>
+      <div class="slide-buttons">
+        <button class="btn-secondary" onclick="nextSlide(1)">← Anterior</button>
+        <button class="btn-primary" onclick="nextSlide(3)">Siguiente →</button>
+      </div>
+    </div>
+    <!-- Slide 3 -->
+    <div class="slide" data-slide="3">
+      <h2>Especies de la ciénega</h2>
+      <p>En la primera escena encontrarás 15 especies de vertebrados. Las flechas en pantalla te guiarán hacia las que no puedas ver directamente.</p>
+      <p>Cuando toques una especie, escucharás su sonido y conocerás su función en el ecosistema.</p>
+      <p class="species-line">🐦 12 aves acuáticas • 🐸 2 anfibios • 🐍 1 reptil</p>
+      <div class="slide-buttons">
+        <button class="btn-secondary" onclick="nextSlide(2)">← Anterior</button>
+        <button class="btn-primary" onclick="enterExperience()">🌿 Entrar a la ciénega</button>
+      </div>
+    </div>
+  </div>
+  <div class="dots">
+    <span class="dot active" onclick="goToSlide(0)"></span>
+    <span class="dot" onclick="goToSlide(1)"></span>
+    <span class="dot" onclick="goToSlide(2)"></span>
+    <span class="dot" onclick="goToSlide(3)"></span>
+  </div>
+</div>
+
+<!-- Scene Transition -->
+<div id="scene-overlay"></div>
+
+<!-- A-Frame Scene -->
+<a-scene id="main-scene" vr-mode-ui="enabled: false" renderer="antialias:true;alpha:false;colorManagement:true">
+  <a-sky id="sky" src="assets/360/escena_0.jpg" rotation="0 -90 0"></a-sky>
+  <a-entity id="species-container"></a-entity>
+  <a-entity id="camera-id" camera="active:true" look-controls position="0 0 0"></a-entity>
+  <a-entity cursor="rayOrigin: mouse" raycaster="far: 1000"></a-entity>
+</a-scene>
+
+<canvas id="env-canvas" width="2048" height="1024" style="display:none"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <!-- Topbar -->
+  <div id="topbar">
+    <span class="logo">🌿 Ciénegas de Lerma</span>
+    <div class="scene-btns" id="scene-btns"></div>
+    <div class="bio-meter">
+      <label>Biofonía</label>
+      <div class="bio-bar-outer"><div class="bio-bar-inner" id="bio-bar"></div></div>
+      <span class="bio-pct" id="bio-pct">100%</span>
+    </div>
+  </div>
+
+  <!-- Compare bar -->
+  <div id="compare-bar">
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--c-accent);opacity:0.8;margin-bottom:0.3rem;">Biofonía por escena</div>
+  </div>
+
+  <!-- Threat card -->
+  <div id="threat-card">
+    <button class="close-btn" onclick="closeThreatCard()">✕</button>
+    <h3 id="threat-title"></h3>
+    <p class="body" id="threat-body"></p>
+    <p class="dato" id="threat-dato"></p>
+    <p class="reflexion" id="threat-reflexion"></p>
+  </div>
+
+  <!-- Species card -->
+  <div id="species-card">
+    <button class="close-btn" onclick="closeSpeciesCard()">✕</button>
+    <div class="sp-header" id="sp-header"></div>
+    <div class="sp-scientific" id="sp-scientific"></div>
+    <p class="sp-desc" id="sp-desc"></p>
+    <p class="sp-role" id="sp-role"></p>
+  </div>
+
+  <!-- Sound panel toggle -->
+  <div id="sound-toggle" onclick="toggleSoundPanel()">🔊</div>
+  <div id="sound-panel"></div>
+
+  <!-- Notebook toggle -->
+  <div id="nb-toggle" onclick="toggleNotebook()">📓</div>
+  <div id="nb-panel">
+    <button class="close-btn" onclick="toggleNotebook()">✕</button>
+    <h3>Cuaderno de campo</h3>
+    <div id="nb-entries"></div>
+  </div>
+
+  <!-- Return button -->
+  <button id="return-btn" onclick="switchScene(0)">🌿 Volver a la ciénega viva</button>
+</div>
+
+<script>
+// ── Look-at-target component (IDÉNTICO al editor) ──
+AFRAME.registerComponent('look-at-target', {
+  schema: { type: 'selector' },
+  tick: function () {
+    if (!this.data) return;
+    const cam = this.data.object3D;
+    const sp = this.el.object3D;
+    const worldPos = new THREE.Vector3();
+    cam.getWorldPosition(worldPos);
+    sp.lookAt(worldPos);
+  }
+});
+
+// ── Estado global ──
+let ALL_SPECIES = [];
+let currentScene = -1;
+let discovered = new Set();
+let nbEntries = {};
+let soundOpen = false;
+let nbOpen = false;
+let currentAmbient = null;
+let currentSpeciesAudio = null;
+let ambientSpeciesAudios = {};   // id → Audio
+let ambientSpeciesTimers = [];   // setTimeout handles
+let isHoveringSpecies = false;
+
+// ── Escenas ──
+const SCENES = [
+  {
+    id: 0,
+    nombre: "La ciénega viva",
+    bioPercent: 100,
+    bioColor: "#6fcf97",
+    skyFile: "assets/360/escena_0.jpg",
+    ambientFile: "assets/ambiente/ambiente_0.mp3",
+    skyGradient: {
+      cielo: ["#0d4f6e", "#1a5c2a", "#2d8a55", "#0d4f6e"],
+      suelo: ["#1a5c2a", "#0d4f6e", "#063040"],
+      extras: "reflejo de agua elíptico azul + siluetas de tular verticales"
+    },
+    amenaza: null
+  },
+  {
+    id: 1,
+    nombre: "El potrero avanza",
+    bioPercent: 53,
+    bioColor: "#f2c94c",
+    skyFile: "assets/360/escena_1.jpg",
+    ambientFile: "assets/ambiente/ambiente_1.mp3",
+    skyGradient: {
+      cielo: ["#6b4c1a", "#8c6b2e", "#4a3510", "#6b4c1a"],
+      suelo: ["#8c6b2e", "#6b4c1a", "#3d2a0e"],
+      extras: "línea horizontal de cerca de madera con postes verticales"
+    },
+    amenaza: {
+      titulo: "🐄 Amenaza: Ganadería extensiva y cambio de uso de suelo",
+      cuerpo: "La expansión de pastizales y corrales ha reducido drásticamente las zonas de tular. Las aves más sensibles al disturbio abandonan el humedal. Solo persisten las especies más tolerantes a la perturbación.",
+      dato: "Las Ciénegas pasaron de ~27,000 ha (s. XIX) a ~3,023 ha actuales. Ceballos (2003); Zepeda Gómez et al. (2012).",
+      reflexion: "💬 ¿Por qué hay menos sonidos de aves que en la ciénega saludable?"
+    }
+  },
+  {
+    id: 2,
+    nombre: "La descarga",
+    bioPercent: 27,
+    bioColor: "#f2994a",
+    skyFile: "assets/360/escena_2.jpg",
+    ambientFile: "assets/ambiente/ambiente_2.mp3",
+    skyGradient: {
+      cielo: ["#3d2a0e", "#5a3a12", "#2a1a08", "#3d2a0e"],
+      suelo: ["#4a3010", "#2a1a08", "#1a0f05"],
+      extras: "mancha de agua oscura semi-opaca + burbujas aleatorias"
+    },
+    amenaza: {
+      titulo: "🏭 Amenaza: Contaminación industrial y doméstica",
+      cuerpo: "Las descargas sin tratamiento eliminan el oxígeno del agua, destruyen la vegetación acuática y hacen el entorno inhabitable para la mayoría de las especies. Solo sobreviven las más resistentes.",
+      dato: "Zepeda Gómez et al. (2012) documentan el deterioro progresivo de la calidad del agua entre 1973 y 2008.",
+      reflexion: "💬 Si el agua está contaminada, ¿qué les pasa a los animales que dependen de ella?"
+    }
+  },
+  {
+    id: 3,
+    nombre: "La orilla urbanizada",
+    bioPercent: 10,
+    bioColor: "#eb5757",
+    skyFile: "assets/360/escena_3.jpg",
+    ambientFile: "assets/ambiente/ambiente_3.mp3",
+    skyGradient: {
+      cielo: ["#2a1a1a", "#3d2020", "#1a1010", "#2a1a1a"],
+      suelo: ["#2a1515", "#1a0f0f", "#100808"],
+      extras: "siluetas de edificios + estrellas visibles (escenas oscuras)"
+    },
+    amenaza: {
+      titulo: "🏗️ Amenaza: Expansión urbana y sobreexplotación del acuífero",
+      cuerpo: "El avance urbano destruye la zona de recarga del acuífero del Valle de Toluca y fragmenta el ecosistema. La sobreexplotación del agua subterránea reduce los niveles del humedal, secando hábitats críticos.",
+      dato: "Rodríguez Guerrero & Blázquez Martínez (2024): las figuras de protección legal no han logrado detener el deterioro ecosistémico.",
+      reflexion: "💬 ¿Qué necesitaría la ciénega para recuperar sus sonidos?"
+    }
+  }
+];
+
+// ── Descriptores ──
+const DESCRIPTORES = {
+  "Anas diazi": { emoji: "🦆", desc: "Especie endémica de México en categoría de amenaza. Nidifica entre los tulares y depende del espejo de agua limpia para alimentarse.", role: "Dispersor de semillas acuáticas. Si desaparece, la regeneración del tular se interrumpe." },
+  "Botaurus lentiginosus": { emoji: "🐦", desc: "Ave de costumbres ocultas que vive entre los tulares más densos. Su canto retumbante puede escucharse hasta un kilómetro de distancia.", role: "Depredador de peces y ranas. Indicador de zonas de tular en buen estado." },
+  "Bubo virginianus mayensis": { emoji: "🦉", desc: "El mayor búho de Norteamérica. Caza al anochecer en los bordes del humedal. Su llamado nocturno anuncia el inicio de la noche en la ciénega.", role: "Depredador tope de roedores, aves y reptiles. Regula las poblaciones de otras especies." },
+  "Buteo albicaudatus": { emoji: "🦅", desc: "Rapaz de mediano tamaño que sobrevuela los pastizales y bordes del humedal. Caza en zonas abiertas con vegetación baja.", role: "Regulador de poblaciones de roedores y reptiles en los bordes del ecosistema." },
+  "Buteo swainsoni": { emoji: "🦅", desc: "Ave migratoria que viaja desde Norteamérica hasta Argentina. Las Ciénegas son una parada clave en su ruta. Su presencia conecta el humedal con ecosistemas de todo el continente.", role: "Depredador de roedores. Indicador de la salud del corredor migratorio." },
+  "Falco peregrinus": { emoji: "🦅", desc: "El animal más rápido del planeta: en picada alcanza más de 300 km/h. Visita la ciénega para cazar aves acuáticas.", role: "Depredador tope de aves. Indicador de alta densidad de vida silvestre." },
+  "Geothlypis speciosa": { emoji: "🐦", desc: "Una de las aves más amenazadas de México. Especie endémica que solo existe en los humedales del Eje Neovolcánico. Su canto es parte inseparable del paisaje sonoro local.", role: "Insectívora. Controla plagas de insectos acuáticos. Especie bandera de la conservación." },
+  "Botaurus exilis": { emoji: "🐦", desc: "La garza más pequeña de América. Vive escondida entre los tulares. Su llamado agudo delata su presencia aunque sea invisible.", role: "Depredador de insectos y peces pequeños en la vegetación emergente." },
+  "Passerculus sandwichensis sanctorum": { emoji: "🐦", desc: "Gorrión migrante más tolerante a la perturbación. Puede sobrevivir en zonas con cierto grado de alteración cuando otras aves ya se fueron.", role: "Consumidor de semillas e insectos. Su dominancia indica inicio del deterioro del hábitat." },
+  "Rallus elegans tenuirostris": { emoji: "🐦", desc: "Subespecie endémica del centro de México, en peligro de extinción. Vive exclusivamente en tulares inundados. Su canto estridente es uno de los sonidos más reconocibles de la ciénega.", role: "Depredador de invertebrados acuáticos. Indicador crítico del estado de conservación del tular." },
+  "Rallus limicola": { emoji: "🐦", desc: "Ave secretiva que habita en los bordes fangosos del tular. Su presencia indica zonas de vegetación emergente conservada.", role: "Depredador de invertebrados. Indicador de la integridad del tular." },
+  "Tachybaptus dominicus": { emoji: "🌊", desc: "El ave acuática más pequeña de la ciénega. Bucea para atrapar peces e invertebrados. Requiere agua limpia para sobrevivir.", role: "Depredador de peces e invertebrados. Indicador de calidad del agua." },
+  "Lithobates montezumae": { emoji: "🐸", desc: "Rana nativa del Eje Neovolcánico que lleva siglos en estas aguas. Su coro nocturno es uno de los sonidos más representativos de la ciénega sana. Muy sensible a la contaminación.", role: "Controladora de insectos. Presa de garzas y serpientes. Indicadora de calidad del agua." },
+  "Dryophytes plicatus": { emoji: "🐸", desc: "Rana arborícola que trepa por la vegetación emergente. Más resistente que otras ranas, puede sobrevivir con contaminación moderada.", role: "Controladora de insectos. Indicadora de zonas con vegetación emergente disponible." },
+  "Crotalus transversus": { emoji: "🐍", desc: "Serpiente endémica del Eje Neovolcánico en categoría de amenaza. Habita en los bordes rocosos de la ciénega. El sonido de su cascabel forma parte del paisaje acústico del sitio.", role: "Depredadora de roedores. Puede persistir en hábitats con cierto grado de perturbación." }
+};
+
+// ── Descriptores de elementos de presión antrópica ──
+const DESCRIPTORES_AMENAZA = {
+  "Vaca": {
+    emoji: "🐄",
+    subtitulo: "Ganadería extensiva",
+    desc: "El ganado pisotea y destruye la vegetación emergente del tular, compacta los suelos hidromorfos e introduce materia fecal que dispara los niveles de nitrógeno y fósforo en el agua. Esto provoca floraciones de algas que consumen el oxígeno disuelto y asfixian al ecosistema acuático.",
+    role: "Destruye el tular que da refugio y alimento a rascones, garzas y ranas. Sin vegetación emergente, el paisaje sonoro colapsa: las primeras especies en desaparecer son las más dependientes de los tulares."
+  },
+  "Fábrica": {
+    emoji: "🏭",
+    subtitulo: "Industria y contaminación",
+    desc: "Las instalaciones industriales cercanas al humedal generan contaminación química, térmica y acústica de forma simultánea. El ruido de maquinaria eleva la línea de ruido de fondo por encima de los 60 dB, interfiriendo con el canto de las aves e impidiendo que ranas y aves se comuniquen, localicen pareja o detecten depredadores.",
+    role: "Los metales pesados y compuestos orgánicos persistentes se acumulan en sedimentos y ascienden por la cadena trófica: invertebrado → pez → garza → rapaz. El ruido industrial desplaza primero a las especies con cantos de baja frecuencia."
+  },
+  "Casa": {
+    emoji: "🏘️",
+    subtitulo: "Urbanización y pérdida de hábitat",
+    desc: "Cada metro cuadrado urbanizado sobre el humedal impermeabiliza el suelo de forma permanente, elimina la capacidad de infiltración y canaliza aguas residuales domésticas con detergentes, medicamentos y materia orgánica directamente hacia la ciénega. La fragmentación del hábitat aísla las poblaciones e impide el flujo genético entre comunidades.",
+    role: "La pérdida de hábitat es irreversible en escala humana. El ruido doméstico y de tráfico vehicular suprime el paisaje sonoro natural: las especies sensibles como el Rascón real o la Mascarita transvolcánica abandonan el sitio antes de que el hábitat desaparezca por completo."
+  }
+};
+
+const fallback = {
+  aves:     { emoji: "🐦", desc: "Ave de las Ciénegas de Lerma.", role: "Forma parte de la cadena trófica del humedal." },
+  anfibios: { emoji: "🐸", desc: "Anfibio de las Ciénegas de Lerma.", role: "Indicador de calidad del agua y la vegetación." },
+  reptiles: { emoji: "🦎", desc: "Reptil de las Ciénegas de Lerma.", role: "Regulador de pequeñas presas en los bordes del humedal." }
+};
+
+// ── Audio Context ──
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+document.addEventListener('click', () => {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}, { once: true });
+
+// ── Ambient audios ──
+const ambientAudios = SCENES.map(s => {
+  const a = new Audio(s.ambientFile);
+  a.loop = true;
+  a.volume = 0.35;
+  return a;
+});
+
+function playAmbient(n) {
+  if (currentAmbient) { currentAmbient.pause(); currentAmbient.currentTime = 0; }
+  currentAmbient = ambientAudios[n];
+  currentAmbient.play().catch(() => playFallbackAmbient(n));
+}
+
+function playFallbackAmbient(n) {
+  if (audioCtx.state === 'suspended') return;
+  const freqs = [220, 180, 140, 110];
+  const gains = [0.06, 0.04, 0.02, 0.015];
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freqs[n];
+  gain.gain.value = gains[n];
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 5);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 5);
+}
+
+function playSpeciesAudio(sp) {
+  stopSpeciesAudio();
+  if (!sp.audio) return;
+  const a = new Audio(sp.audio.replace(/\\/g, '/'));
+  a.volume = sp.volumen || 0.85;
+  a.loop = true;
+  currentSpeciesAudio = a;
+  a.play().catch(() => playFallbackBeep(sp.grupo));
+}
+
+function stopSpeciesAudio() {
+  if (currentSpeciesAudio) {
+    currentSpeciesAudio.pause();
+    currentSpeciesAudio.currentTime = 0;
+    currentSpeciesAudio = null;
+  }
+}
+
+// ── Sistema de capas rotativas por grupo biológico ──
+//
+// Máximo UNA especie activa por capa simultáneamente:
+//   capa "aves"     → 1 ave sonando a la vez
+//   capa "anfibios" → 1 anfibio sonando a la vez
+//   capa "reptiles" → 1 reptil sonando a la vez
+//
+// Cada capa tiene su propio ciclo: suena N segundos, silencio M segundos,
+// luego elige aleatoriamente la siguiente especie del mismo grupo.
+// Los tres ciclos arrancan con distintos retardos iniciales para no coincidir.
+
+const LAYER_CONFIG = {
+  aves:     { playMin: 8000,  playMax: 14000, silenceMin: 4000,  silenceMax: 9000,  vol: 0.48, startDelay: 500   },
+  anfibios: { playMin: 10000, playMax: 18000, silenceMin: 6000,  silenceMax: 12000, vol: 0.44, startDelay: 3500  },
+  reptiles: { playMin: 12000, playMax: 22000, silenceMin: 10000, silenceMax: 20000, vol: 0.38, startDelay: 7000  }
+};
+
+const layerState = { aves: null, anfibios: null, reptiles: null };   // Audio activo por capa
+const layerTimers = { aves: null, anfibios: null, reptiles: null };  // setTimeout activo por capa
+let layerSceneId = -1;   // escena para la que corre el sistema
+
+function startAmbientSpeciesSounds() {
+  stopAllAmbientSpecies();
+  layerSceneId = currentScene;
+
+  const grupos = ['aves', 'anfibios', 'reptiles'];
+  grupos.forEach(grupo => {
+    const cfg = LAYER_CONFIG[grupo];
+    const pool = ALL_SPECIES.filter(sp =>
+      sp.audio &&
+      sp.grupo === grupo &&
+      (sp.escenas || [0]).includes(currentScene)
+    );
+    if (pool.length === 0) return;
+
+    // Cada capa arranca en un momento distinto
+    layerTimers[grupo] = setTimeout(() => {
+      if (layerSceneId !== currentScene) return;
+      scheduleLayerTurn(grupo, pool, true);
+    }, cfg.startDelay);
+  });
+}
+
+function scheduleLayerTurn(grupo, pool, isFirst) {
+  if (layerSceneId !== currentScene) return;
+  const cfg = LAYER_CONFIG[grupo];
+
+  // Elegir especie aleatoria del grupo (evitar repetir la misma si hay más de 1)
+  let candidates = pool;
+  if (pool.length > 1 && layerState[grupo]) {
+    const lastSrc = layerState[grupo].src;
+    candidates = pool.filter(sp => !lastSrc.includes(encodeURIComponent(sp.id)));
+    if (candidates.length === 0) candidates = pool;
+  }
+  const sp = candidates[Math.floor(Math.random() * candidates.length)];
+
+  // Crear y reproducir el audio de esta capa
+  const a = new Audio(sp.audio.replace(/\\/g, '/'));
+  a.volume = isHoveringSpecies ? 0 : cfg.vol;
+  a.loop = false;
+  layerState[grupo] = a;
+  ambientSpeciesAudios[sp.id] = a;   // registrar para pause/resume
+
+  const playDuration = cfg.playMin + Math.random() * (cfg.playMax - cfg.playMin);
+  const silenceDuration = cfg.silenceMin + Math.random() * (cfg.silenceMax - cfg.silenceMin);
+
+  a.play().catch(() => {});
+
+  // Después del tiempo de reproducción, detener y programar silencio → siguiente turno
+  layerTimers[grupo] = setTimeout(() => {
+    if (layerSceneId !== currentScene) return;
+    // Fade out suave antes del silencio
+    fadeTo(a, 0, 600, () => {
+      a.pause();
+      a.currentTime = 0;
+      if (ambientSpeciesAudios[sp.id] === a) delete ambientSpeciesAudios[sp.id];
+      layerState[grupo] = null;
+      // Silencio → siguiente turno
+      layerTimers[grupo] = setTimeout(() => {
+        if (layerSceneId !== currentScene) return;
+        scheduleLayerTurn(grupo, pool, false);
+      }, silenceDuration);
+    });
+  }, playDuration);
+}
+
+// Fade lineal de volumen para evitar clicks
+function fadeTo(audio, targetVol, durationMs, onDone) {
+  const steps = 20;
+  const startVol = audio.volume;
+  const delta = (targetVol - startVol) / steps;
+  let step = 0;
+  const interval = setInterval(() => {
+    step++;
+    audio.volume = Math.max(0, Math.min(1, startVol + delta * step));
+    if (step >= steps) {
+      clearInterval(interval);
+      if (onDone) onDone();
+    }
+  }, durationMs / steps);
+}
+
+function stopAllAmbientSpecies() {
+  // Cancelar todos los timers de capas
+  ['aves', 'anfibios', 'reptiles'].forEach(g => {
+    if (layerTimers[g]) { clearTimeout(layerTimers[g]); layerTimers[g] = null; }
+    if (layerState[g])  { layerState[g].pause(); layerState[g].currentTime = 0; layerState[g] = null; }
+  });
+  ambientSpeciesTimers.forEach(t => clearTimeout(t));
+  ambientSpeciesTimers = [];
+  Object.values(ambientSpeciesAudios).forEach(a => { a.pause(); a.currentTime = 0; });
+  ambientSpeciesAudios = {};
+  layerSceneId = -1;
+}
+
+function pauseAllAmbientSpecies() {
+  Object.values(ambientSpeciesAudios).forEach(a => a.pause());
+}
+
+function resumeAllAmbientSpecies() {
+  if (isHoveringSpecies) return;
+  const cfg_vols = { aves: 0.48, anfibios: 0.44, reptiles: 0.38 };
+  ['aves', 'anfibios', 'reptiles'].forEach(g => {
+    if (layerState[g]) {
+      layerState[g].volume = cfg_vols[g];
+      layerState[g].play().catch(() => {});
+    }
+  });
+}
+
+function playFallbackBeep(grupo) {
+  if (audioCtx.state === 'suspended') return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  if (grupo === 'aves') { osc.type = 'triangle'; osc.frequency.value = 660; }
+  else if (grupo === 'anfibios') { osc.type = 'square'; osc.frequency.value = 330; }
+  else { osc.type = 'sawtooth'; osc.frequency.value = 180; }
+  gain.gain.value = 0.12;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 1.2);
+}
+
+// ── Cielo Canvas fallback ──
+function generateSkyCanvas(n) {
+  const canvas = document.getElementById('env-canvas');
+  const ctx = canvas.getContext('2d');
+  const cfg = SCENES[n].skyGradient;
+
+  // Cielo (mitad superior)
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, 512);
+  cfg.cielo.forEach((c, i) => skyGrad.addColorStop(i / (cfg.cielo.length - 1), c));
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, 2048, 512);
+
+  // Suelo (mitad inferior)
+  const groundGrad = ctx.createLinearGradient(0, 512, 0, 1024);
+  cfg.suelo.forEach((c, i) => groundGrad.addColorStop(i / (cfg.suelo.length - 1), c));
+  ctx.fillStyle = groundGrad;
+  ctx.fillRect(0, 512, 2048, 1024);
+
+  // Extras por escena
+  if (n === 0) {
+    ctx.fillStyle = 'rgba(13,79,110,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(1024, 600, 800, 120, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(26,92,42,0.5)';
+    for (let i = 0; i < 30; i++) {
+      const x = 100 + Math.random() * 1848;
+      const h = 40 + Math.random() * 80;
+      ctx.fillRect(x, 512 - h, 4, h);
+    }
+  } else if (n === 1) {
+    ctx.fillStyle = 'rgba(107,76,26,0.7)';
+    ctx.fillRect(0, 520, 2048, 8);
+    for (let i = 0; i < 20; i++) {
+      ctx.fillRect(i * 110 + 20, 480, 8, 60);
+    }
+  } else if (n === 2) {
+    ctx.fillStyle = 'rgba(42,26,8,0.4)';
+    ctx.beginPath();
+    ctx.ellipse(1024, 620, 600, 100, 0, 0, Math.PI * 2);
+    ctx.fill();
+    for (let i = 0; i < 15; i++) {
+      const bx = 400 + Math.random() * 1248;
+      const by = 550 + Math.random() * 140;
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath();
+      ctx.arc(bx, by, 3 + Math.random() * 8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  } else if (n === 3) {
+    ctx.fillStyle = 'rgba(42,26,26,0.8)';
+    for (let i = 0; i < 12; i++) {
+      const bw = 60 + Math.random() * 100;
+      const bh = 80 + Math.random() * 160;
+      ctx.fillRect(i * 170 + 50, 512 - bh, bw, bh);
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    for (let i = 0; i < 50; i++) {
+      const sx = Math.random() * 2048;
+      const sy = Math.random() * 400;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1 + Math.random() * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  return canvas.toDataURL('image/jpeg', 0.85);
+}
+
+function setSkyTexture(n) {
+  const sky = document.getElementById('sky');
+  const path = SCENES[n].skyFile.replace(/\\/g, '/');
+  const testImg = new Image();
+  testImg.onload = () => sky.setAttribute('src', path);
+  testImg.onerror = () => sky.setAttribute('src', generateSkyCanvas(n));
+  testImg.src = path;
+}
+
+// ── Carga de especies ──
+async function loadSpecies() {
+  try {
+    const res = await fetch('especies.json');
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    ALL_SPECIES = data.map(sp => {
+      const amenaza = DESCRIPTORES_AMENAZA[sp.nombre];
+      const d = DESCRIPTORES[sp.cientifico] || fallback[sp.grupo] || fallback.aves;
+      return {
+        ...sp,
+        imagen:   sp.imagen.replace(/\\/g, '/'),
+        audio:    sp.audio  ? sp.audio.replace(/\\/g, '/') : '',
+        escenas:  sp.escenas || [0],
+        emoji:    amenaza ? amenaza.emoji    : d.emoji,
+        desc:     amenaza ? amenaza.desc     : d.desc,
+        role:     amenaza ? amenaza.role     : d.role,
+        subtitulo:amenaza ? amenaza.subtitulo: null,
+        esAmenaza: !!amenaza
+      };
+    });
+  } catch(e) {
+    console.warn('No se pudo cargar especies.json:', e.message);
+    ALL_SPECIES = [];
+  }
+}
+
+// ── Crear entidades A-Frame ──
+function createSpeciesEntities() {
+  const container = document.getElementById('species-container');
+  container.innerHTML = '';
+  ALL_SPECIES.forEach(sp => {
+    const entity = document.createElement('a-image');
+    entity.setAttribute('src', sp.imagen);
+    entity.setAttribute('position', sp.posicion);
+    entity.setAttribute('scale', sp.escala);
+    entity.setAttribute('look-at-target', '#camera-id');
+    entity.setAttribute('transparent', 'true');
+    entity.setAttribute('alpha-test', '0.5');
+    entity.setAttribute('id', 'sp-' + sp.id);
+    entity.addEventListener('mouseenter', () => {
+      const escenas = sp.escenas || [0];
+      if (!escenas.includes(currentScene)) return;
+      isHoveringSpecies = true;
+      // Fade out suave de las capas activas
+      ['aves', 'anfibios', 'reptiles'].forEach(g => {
+        if (layerState[g]) fadeTo(layerState[g], 0, 400, () => {
+          if (isHoveringSpecies && layerState[g]) layerState[g].pause();
+        });
+      });
+      showSpecies(sp.id);
+    });
+    entity.addEventListener('mouseleave', () => {
+      isHoveringSpecies = false;
+      closeSpeciesCard();
+      stopSpeciesAudio();
+      resumeAllAmbientSpecies();
+    });
+    container.appendChild(entity);
+  });
+}
+
+function updateSpeciesForScene(n) {
+  ALL_SPECIES.forEach(sp => {
+    const el = document.getElementById('sp-' + sp.id);
+    if (!el) return;
+    const escenas = sp.escenas || [0];
+    if (escenas.includes(n)) {
+      el.setAttribute('visible', 'true');
+    } else {
+      el.setAttribute('visible', 'false');
+    }
+  });
+}
+
+// ── UI Functions ──
+function nextSlide(n) { goToSlide(n); }
+
+function goToSlide(n) {
+  document.querySelectorAll('.slide').forEach((s, i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === n);
+  });
+}
+
+function skipPretraining() { enterExperience(); }
+
+function enterExperience() {
+  document.getElementById('pretraining').classList.remove('active');
+  document.getElementById('hud').classList.add('active');
+
+  initScene();
+  switchScene(0);
+
+  setTimeout(() => {
+    document.getElementById('compare-bar').classList.add('visible');
+  }, 1500);
+}
+
+function initScene() {
+  const btnsContainer = document.getElementById('scene-btns');
+  btnsContainer.innerHTML = '';
+  SCENES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'scene-btn';
+    btn.textContent = s.nombre.split(' — ')[0] || s.nombre;
+    btn.addEventListener('click', () => switchScene(s.id));
+    btnsContainer.appendChild(btn);
+  });
+
+  const cmpBar = document.getElementById('compare-bar');
+  cmpBar.innerHTML = '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--c-accent);opacity:0.8;margin-bottom:0.3rem;">Biofonía por escena</div>';
+  const labels = ['Sana', 'Potrero', 'Descarga', 'Orilla'];
+  SCENES.forEach((s, i) => {
+    const block = document.createElement('div');
+    block.className = 'cmp-block';
+    block.innerHTML = `
+      <span class="cmp-label">${labels[i]}</span>
+      <div class="cmp-bar-wrap">
+        <div class="cmp-bar-fill" id="cmp-fill-${i}" style="width:${s.bioPercent}%; background:${s.bioColor}"></div>
+      </div>
+      <span class="cmp-pct">${s.bioPercent}%</span>
+    `;
+    cmpBar.appendChild(block);
+  });
+
+  createSpeciesEntities();
+}
+
+function switchScene(n) {
+  if (n === currentScene) return;
+  currentScene = n;
+
+  const overlay = document.getElementById('scene-overlay');
+  overlay.classList.add('fade');
+
+  setTimeout(() => {
+    setSkyTexture(n);
+    updateBiophonyBar(n);
+    updateSceneButtons(n);
+    updateThreatCard(n);
+    updateReturnButton(n);
+    updateSpeciesForScene(n);
+    closeSpeciesCard();
+    stopSpeciesAudio();
+
+    playAmbient(n);
+    stopAllAmbientSpecies();
+    renderSoundRows();
+    startAmbientSpeciesSounds();
+
+    setTimeout(() => overlay.classList.remove('fade'), 200);
+  }, 500);
+}
+
+function updateBiophonyBar(n) {
+  const scene = SCENES[n];
+  const bar = document.getElementById('bio-bar');
+  const pct = document.getElementById('bio-pct');
+  bar.style.width = scene.bioPercent + '%';
+  bar.style.background = scene.bioColor;
+  pct.textContent = scene.bioPercent + '%';
+  pct.style.color = scene.bioColor;
+}
+
+function updateSceneButtons(n) {
+  document.querySelectorAll('.scene-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === n);
+  });
+}
+
+function updateThreatCard(n) {
+  const card = document.getElementById('threat-card');
+  const escena = SCENES[n];
+  if (n === 0 || !escena.amenaza) {
+    card.classList.remove('visible');
+    return;
+  }
+  const a = escena.amenaza;
+  document.getElementById('threat-title').textContent = a.titulo;
+  document.getElementById('threat-body').textContent = a.cuerpo;
+  document.getElementById('threat-dato').textContent = a.dato;
+  document.getElementById('threat-reflexion').textContent = a.reflexion;
+  card.classList.add('visible');
+}
+
+function closeThreatCard() {
+  document.getElementById('threat-card').classList.remove('visible');
+}
+
+function updateReturnButton(n) {
+  const btn = document.getElementById('return-btn');
+  btn.classList.toggle('visible', n !== 0);
+}
+
+function showSpecies(id) {
+  const sp = ALL_SPECIES.find(s => s.id === id);
+  if (!sp) return;
+
+  playSpeciesAudio(sp);
+
+  if (!discovered.has(id) && !sp.esAmenaza) {
+    discovered.add(id);
+    showDiscoveryFlash(sp);
+    addToNotebook(sp);
+  }
+
+  const card = document.getElementById('species-card');
+  document.getElementById('sp-header').textContent = sp.emoji + ' ' + sp.nombre;
+
+  if (sp.esAmenaza) {
+    // Presión antrópica: mostrar subtítulo y prefijo de impacto
+    document.getElementById('sp-scientific').textContent = sp.subtitulo || 'Presión antrópica';
+    document.getElementById('sp-desc').textContent = sp.desc;
+    document.getElementById('sp-role').innerHTML = '⚠️ <strong>Impacto en el ecosistema</strong><br>' + sp.role;
+    card.classList.add('amenaza');
+  } else {
+    document.getElementById('sp-scientific').textContent = sp.cientifico;
+    document.getElementById('sp-desc').textContent = sp.desc;
+    document.getElementById('sp-role').innerHTML = '🔗 ' + sp.role;
+    card.classList.remove('amenaza');
+  }
+
+  card.classList.add('visible');
+}
+
+function closeSpeciesCard() {
+  const card = document.getElementById('species-card');
+  card.classList.remove('visible', 'amenaza');
+}
+
+function showDiscoveryFlash(sp) {
+  const flash = document.createElement('div');
+  flash.className = 'flash-popup';
+  flash.innerHTML = `
+    <div class="flash-title">¡Descubriste: ${sp.emoji} ${sp.nombre}!</div>
+    <div class="flash-role">${sp.role}</div>
+  `;
+  document.body.appendChild(flash);
+
+  flash.style.animation = 'flashIn 0.5s ease forwards, flashOut 0.8s ease 3.5s forwards';
+  setTimeout(() => {
+    if (flash.parentNode) flash.parentNode.removeChild(flash);
+  }, 4500);
+}
+
+function addToNotebook(sp) {
+  if (nbEntries[sp.id]) return;
+  nbEntries[sp.id] = {
+    sp: sp,
+    sceneName: SCENES[currentScene].nombre,
+    text: ''
+  };
+  renderNotebook();
+}
+
+function renderNotebook() {
+  const container = document.getElementById('nb-entries');
+  const entries = Object.values(nbEntries);
+  if (entries.length === 0) {
+    container.innerHTML = '<p class="nb-empty">Aún no has descubierto especies. ¡Toca una en la escena para comenzar!</p>';
+    return;
+  }
+  container.innerHTML = '';
+  entries.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'nb-entry';
+    div.innerHTML = `
+      <span class="scene-tag">${entry.sceneName}</span>
+      <div class="nb-name">${entry.sp.emoji} ${entry.sp.nombre}</div>
+      <textarea placeholder="¿Cómo describirías su sonido? ¿Por qué es importante para la ciénega?"
+        oninput="updateNbEntry('${entry.sp.id}', this.value)">${entry.text}</textarea>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateNbEntry(id, text) {
+  if (nbEntries[id]) nbEntries[id].text = text;
+}
+
+function renderSoundRows() {
+  const panel = document.getElementById('sound-panel');
+  const visible = ALL_SPECIES.filter(sp => {
+    const escenas = sp.escenas || [0];
+    return escenas.includes(currentScene);
+  });
+
+  if (visible.length === 0) {
+    panel.innerHTML = '<p style="font-size:0.85rem;opacity:0.5;text-align:center;">No hay especies visibles en esta escena.</p>';
+    return;
+  }
+
+  panel.innerHTML = '';
+  visible.forEach(sp => {
+    const row = document.createElement('div');
+    row.className = 'sound-row';
+    row.innerHTML = `
+      <span>${sp.emoji}</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${sp.nombre}</span>
+      <input type="range" min="0" max="1" step="0.1" value="${sp.volumen || 0.85}" disabled>
+    `;
+    panel.appendChild(row);
+  });
+}
+
+function toggleSoundPanel() {
+  soundOpen = !soundOpen;
+  document.getElementById('sound-panel').classList.toggle('open', soundOpen);
+  if (soundOpen) renderSoundRows();
+}
+
+function toggleNotebook() {
+  nbOpen = !nbOpen;
+  document.getElementById('nb-panel').classList.toggle('open', nbOpen);
+  if (nbOpen) renderNotebook();
+}
+
+// ── Inicio ──
+async function init() {
+  const loadStart = Date.now();
+  await loadSpecies();
+
+  const elapsed = Date.now() - loadStart;
+  if (elapsed < 1000) {
+    await new Promise(r => setTimeout(r, 1000 - elapsed));
+  }
+
+  document.getElementById('loading-screen').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('pretraining').classList.add('active');
+  }, 600);
+}
+
+init();
+</script>
+</body>
+</html>
+
