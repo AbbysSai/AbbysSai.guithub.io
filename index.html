@@ -297,22 +297,71 @@ body {
   border-radius: 8px; padding: 0.6rem 0.8rem;
 }
 
-/* Flash */
-.flash-popup {
-  position: fixed; z-index: 7500;
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-  background: rgba(10,40,20,0.95);
-  border: 2px solid var(--c-vivid);
-  border-radius: 16px;
-  padding: 1.5rem 2rem;
-  text-align: center;
-  animation: flashIn 0.5s ease forwards;
-  max-width: 340px;
+/* Miniatura de especie en la tarjeta (Principio de Contigüidad Espacial) */
+#species-card .sp-thumb-wrap {
+  display: flex; align-items: center; gap: 0.9rem;
+  margin-bottom: 0.7rem;
 }
-.flash-popup .flash-title { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 0.4rem; color: var(--c-vivid); }
-.flash-popup .flash-role { font-size: 0.85rem; line-height: 1.45; opacity: 0.8; }
-@keyframes flashIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-@keyframes flashOut { from { opacity: 1; } to { opacity: 0; } }
+#species-card .sp-thumb {
+  width: 72px; height: 72px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid rgba(168,216,176,0.25);
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.2);
+}
+#species-card .sp-thumb-wrap .sp-header-col {
+  display: flex; flex-direction: column; gap: 0.15rem;
+}
+#species-card.amenaza .sp-thumb { border-color: rgba(220,80,60,0.35); }
+
+/* Pulso de señalización en sprites no descubiertos (Principio de Señalización) */
+@keyframes speciesPulse {
+  0%   { box-shadow: 0 0 0   0   rgba(111,207,151,0); }
+  50%  { box-shadow: 0 0 18px 6px rgba(111,207,151,0.55); }
+  100% { box-shadow: 0 0 0   0   rgba(111,207,151,0); }
+}
+.sp-pulse-ring {
+  position: absolute;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(111,207,151,0.7);
+  animation: ringPulse 2s ease-out infinite;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+@keyframes ringPulse {
+  0%   { transform: translate(-50%,-50%) scale(0.5); opacity: 0.9; }
+  100% { transform: translate(-50%,-50%) scale(2.2); opacity: 0; }
+}
+.flash-popup {
+  position: fixed; z-index: 8000;
+  top: 72px; left: 50%; transform: translateX(-50%);
+  background: rgba(10,40,20,0.96);
+  border: 2px solid var(--c-vivid);
+  border-radius: 40px;
+  padding: 0.55rem 1.4rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.flash-popup .flash-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--c-vivid);
+  margin: 0;
+}
+.flash-popup .flash-role { display: none; }
+
+@keyframes flashIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes flashOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
 
 /* Notebook */
 #nb-toggle {
@@ -484,8 +533,8 @@ a-scene canvas { cursor: crosshair; }
     max-height: 55vh;
   }
 
-  /* Flash centrado y más grande en móvil */
-  .flash-popup { max-width: 90vw; padding: 1.2rem 1.5rem; }
+  /* Flash — mantener como banner compacto en móvil */
+  .flash-popup { max-width: 88vw; padding: 0.45rem 1rem; font-size: 0.9rem; }
 
   /* Slides pretraining */
   #pretraining { padding: 1rem; }
@@ -661,11 +710,19 @@ a-scene canvas { cursor: crosshair; }
   <!-- Species card -->
   <div id="species-card">
     <button class="close-btn" onclick="closeSpeciesCard()">✕</button>
-    <div class="sp-header" id="sp-header"></div>
-    <div class="sp-scientific" id="sp-scientific"></div>
+    <div class="sp-thumb-wrap">
+      <img class="sp-thumb" id="sp-thumb" src="" alt="">
+      <div class="sp-header-col">
+        <div class="sp-header" id="sp-header"></div>
+        <div class="sp-scientific" id="sp-scientific"></div>
+      </div>
+    </div>
     <p class="sp-desc" id="sp-desc"></p>
     <p class="sp-role" id="sp-role"></p>
   </div>
+
+  <!-- Pulsos de señalización (Principio de Señalización) -->
+  <div id="pulse-layer" style="position:fixed;inset:0;pointer-events:none;z-index:10;overflow:hidden;"></div>
 
   <!-- Notebook toggle -->
   <div id="nb-toggle" onclick="toggleNotebook()">📓</div>
@@ -1208,7 +1265,7 @@ function createSpeciesEntities() {
       const escenas = sp.escenas || [0];
       if (!escenas.includes(currentScene)) return;
       isHoveringSpecies = true;
-      // Fade out suave de las capas activas
+      // Fade out suave de las capas activas de especies
       ['aves', 'anfibios', 'reptiles'].forEach(g => {
         if (layerState[g]) fadeTo(layerState[g], 0, 400, () => {
           if (isHoveringSpecies && layerState[g]) layerState[g].pause();
@@ -1218,7 +1275,7 @@ function createSpeciesEntities() {
     });
     entity.addEventListener('mouseleave', () => {
       isHoveringSpecies = false;
-      closeSpeciesCard();
+      closeSpeciesCard();   // closeSpeciesCard ya reanuda currentAmbient
       stopSpeciesAudio();
       resumeAllAmbientSpecies();
     });
@@ -1273,6 +1330,13 @@ function initScene() {
   });
 
   createSpeciesEntities();
+  // Iniciar capa de señalización después de que A-Frame termine de cargar
+  const sceneEl = document.getElementById('main-scene');
+  if (sceneEl.hasLoaded) {
+    initPulseLayer();
+  } else {
+    sceneEl.addEventListener('loaded', initPulseLayer, { once: true });
+  }
 }
 
 function switchScene(n) {
@@ -1295,6 +1359,8 @@ function switchScene(n) {
     playAmbient(n);
     stopAllAmbientSpecies();
     startAmbientSpeciesSounds();
+    // Actualizar visibilidad de pulsos para la nueva escena
+    ALL_SPECIES.forEach(sp => updatePulseForSprite(sp.id, discovered.has(sp.id)));
 
     setTimeout(() => overlay.classList.remove('fade'), 200);
   }, 500);
@@ -1346,13 +1412,24 @@ function showSpecies(id) {
 
   playSpeciesAudio(sp);
 
+  // ── Principio de Coherencia: silenciar ambiente mientras se lee la tarjeta ──
+  if (currentAmbient) currentAmbient.pause();
+
   if (!discovered.has(id) && !sp.esAmenaza) {
     discovered.add(id);
     showDiscoveryFlash(sp);
     addToNotebook(sp);
+    // Quitar el pulso de señalización de este sprite
+    updatePulseForSprite(sp.id, true);
   }
 
   const card = document.getElementById('species-card');
+
+  // ── Principio de Contigüidad Espacial: miniatura junto al nombre ──
+  const thumb = document.getElementById('sp-thumb');
+  thumb.src = sp.imagen || '';
+  thumb.alt = sp.nombre;
+
   document.getElementById('sp-header').textContent = sp.emoji + ' ' + sp.nombre;
 
   if (sp.esAmenaza) {
@@ -1373,21 +1450,23 @@ function showSpecies(id) {
 function closeSpeciesCard() {
   const card = document.getElementById('species-card');
   card.classList.remove('visible', 'amenaza');
+  // ── Principio de Coherencia: reanudar ambiente al cerrar la tarjeta ──
+  if (currentAmbient && !isHoveringSpecies) currentAmbient.play().catch(() => {});
 }
 
 function showDiscoveryFlash(sp) {
+  // Quitar flash anterior si ya existe
+  document.querySelectorAll('.flash-popup').forEach(f => f.remove());
+
   const flash = document.createElement('div');
   flash.className = 'flash-popup';
-  flash.innerHTML = `
-    <div class="flash-title">¡Descubriste: ${sp.emoji} ${sp.nombre}!</div>
-    <div class="flash-role">${sp.role}</div>
-  `;
+  flash.innerHTML = `<div class="flash-title">⭐ ¡Descubriste: ${sp.emoji} ${sp.nombre}!</div>`;
   document.body.appendChild(flash);
 
-  flash.style.animation = 'flashIn 0.5s ease forwards, flashOut 0.8s ease 3.5s forwards';
+  flash.style.animation = 'flashIn 0.35s ease forwards, flashOut 0.5s ease 2.2s forwards';
   setTimeout(() => {
     if (flash.parentNode) flash.parentNode.removeChild(flash);
-  }, 4500);
+  }, 2800);
 }
 
 function addToNotebook(sp) {
@@ -1429,6 +1508,91 @@ function toggleNotebook() {
   nbOpen = !nbOpen;
   document.getElementById('nb-panel').classList.toggle('open', nbOpen);
   if (nbOpen) renderNotebook();
+}
+
+// ── Principio de Señalización: pulsos en especies no descubiertas ──
+let pulseAnimFrame = null;
+const pulseEls = {};   // sp.id → ring DOM element
+
+function initPulseLayer() {
+  // Crear un anillo por cada especie no amenaza
+  const layer = document.getElementById('pulse-layer');
+  layer.innerHTML = '';
+  Object.keys(pulseEls).forEach(k => delete pulseEls[k]);
+
+  ALL_SPECIES.forEach(sp => {
+    if (sp.esAmenaza) return;
+    const ring = document.createElement('div');
+    ring.className = 'sp-pulse-ring';
+    ring.id = 'pulse-' + sp.id;
+    ring.style.display = 'none';
+    ring.style.left = '-9999px';
+    ring.style.top  = '-9999px';
+    // Retrasar inicio de animación aleatoriamente para que no pulsen a la vez
+    ring.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+    layer.appendChild(ring);
+    pulseEls[sp.id] = ring;
+  });
+
+  // Actualizar posiciones en cada frame
+  if (pulseAnimFrame) cancelAnimationFrame(pulseAnimFrame);
+  updatePulsePositions();
+}
+
+function updatePulsePositions() {
+  const sceneEl = document.getElementById('main-scene');
+  if (!sceneEl || !sceneEl.camera) {
+    pulseAnimFrame = requestAnimationFrame(updatePulsePositions);
+    return;
+  }
+
+  const camera = sceneEl.camera;
+  const canvas = sceneEl.canvas;
+  if (!canvas) { pulseAnimFrame = requestAnimationFrame(updatePulsePositions); return; }
+
+  const W = canvas.clientWidth  || window.innerWidth;
+  const H = canvas.clientHeight || window.innerHeight;
+
+  ALL_SPECIES.forEach(sp => {
+    const ring = pulseEls[sp.id];
+    if (!ring) return;
+
+    // Ocultar si ya fue descubierta o no está en la escena actual
+    if (discovered.has(sp.id) || !(sp.escenas || [0]).includes(currentScene)) {
+      ring.style.display = 'none';
+      return;
+    }
+
+    const el = document.getElementById('sp-' + sp.id);
+    if (!el || !el.object3D) { ring.style.display = 'none'; return; }
+
+    // Proyectar posición 3D a coordenadas de pantalla
+    const worldPos = new THREE.Vector3();
+    el.object3D.getWorldPosition(worldPos);
+
+    const projected = worldPos.clone().project(camera);
+
+    // Descartar si está detrás de la cámara o fuera de pantalla
+    if (projected.z > 1 || Math.abs(projected.x) > 1.15 || Math.abs(projected.y) > 1.15) {
+      ring.style.display = 'none';
+      return;
+    }
+
+    const sx = (projected.x * 0.5 + 0.5) * W;
+    const sy = (-projected.y * 0.5 + 0.5) * H;
+
+    ring.style.display = 'block';
+    ring.style.left = sx + 'px';
+    ring.style.top  = sy + 'px';
+  });
+
+  pulseAnimFrame = requestAnimationFrame(updatePulsePositions);
+}
+
+function updatePulseForSprite(id, isDiscovered) {
+  const ring = pulseEls[id];
+  if (!ring) return;
+  if (isDiscovered) ring.style.display = 'none';
 }
 
 // ── Touch support para móvil ──
