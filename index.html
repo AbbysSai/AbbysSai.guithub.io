@@ -57,81 +57,83 @@ body {
   background: linear-gradient(160deg, #0a1a12 0%, #0d2f1a 40%, #0d4f6e 100%);
   display: none; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 2rem;
+  padding: 2.5rem;
 }
 #pretraining.active { display: flex; }
 .slide-container {
-  position: relative; width: 100%; max-width: 700px;
-  min-height: 400px;
+  position: relative; width: 100%; max-width: 900px;
+  min-height: 460px;
 }
 .slide {
   display: none; flex-direction: column;
   align-items: center; text-align: center;
-  gap: 1.2rem;
+  gap: 1.5rem;
   animation: fadeIn 0.5s ease;
 }
 .slide.active { display: flex; }
 .slide h2 {
   font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-size: 2.4rem;
   color: var(--c-accent);
+  line-height: 1.25;
 }
 .slide p {
-  font-size: 1.05rem; line-height: 1.6;
-  max-width: 600px;
+  font-size: 1.3rem; line-height: 1.65;
+  max-width: 780px;
 }
-.slide-buttons { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; justify-content: center; }
+.slide-buttons { display: flex; gap: 1.2rem; align-items: center; margin-top: 1.2rem; flex-wrap: wrap; justify-content: center; }
 .btn-primary {
   background: var(--c-vivid);
   color: #0a1a12;
-  border: none; padding: 0.75rem 2rem;
-  border-radius: 8px; font-size: 1.1rem;
-  font-weight: 600; cursor: pointer;
+  border: none; padding: 1rem 2.5rem;
+  border-radius: 10px; font-size: 1.3rem;
+  font-weight: 700; cursor: pointer;
   transition: transform 0.2s, background 0.2s;
 }
 .btn-primary:hover { transform: scale(1.05); background: #8ee0b5; }
 .btn-secondary {
   background: transparent;
   color: var(--c-accent);
-  border: 1px solid var(--c-accent);
-  padding: 0.5rem 1.2rem;
-  border-radius: 8px; font-size: 0.9rem;
+  border: 2px solid var(--c-accent);
+  padding: 0.7rem 1.6rem;
+  border-radius: 10px; font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer; opacity: 0.7;
   transition: opacity 0.2s;
 }
 .btn-secondary:hover { opacity: 1; }
-.card-row { display: flex; gap: 1rem; width: 100%; flex-wrap: wrap; justify-content: center; }
+.card-row { display: flex; gap: 1.2rem; width: 100%; flex-wrap: wrap; justify-content: center; }
 .sound-card {
   background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px; padding: 1.2rem;
-  flex: 1; min-width: 180px; max-width: 220px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 1.5rem;
+  flex: 1; min-width: 200px; max-width: 260px;
   text-align: center;
 }
-.sound-card .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
-.sound-card h4 { font-family: var(--font-display); margin-bottom: 0.4rem; }
-.sound-card p { font-size: 0.85rem; line-height: 1.4; }
+.sound-card .emoji { font-size: 2.8rem; margin-bottom: 0.6rem; }
+.sound-card h4 { font-family: var(--font-display); margin-bottom: 0.5rem; font-size: 1.2rem; }
+.sound-card p { font-size: 1rem; line-height: 1.5; }
 .scene-grid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 0.8rem; width: 100%;
+  gap: 1rem; width: 100%;
 }
 .scene-card {
-  border-radius: 10px; padding: 1rem;
+  border-radius: 14px; padding: 1.3rem;
   text-align: left;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
 }
-.scene-card h4 { font-family: var(--font-display); margin-bottom: 0.3rem; }
-.scene-card p { font-size: 0.8rem; line-height: 1.35; }
-.species-line { font-size: 0.95rem; opacity: 0.8; margin-top: 0.5rem; }
-.dots { display: flex; gap: 0.6rem; margin-top: 1.5rem; }
+.scene-card h4 { font-family: var(--font-display); margin-bottom: 0.4rem; font-size: 1.15rem; }
+.scene-card p { font-size: 0.95rem; line-height: 1.45; }
+.species-line { font-size: 1.1rem; opacity: 0.8; margin-top: 0.6rem; }
+.dots { display: flex; gap: 0.8rem; margin-top: 1.8rem; }
 .dot {
-  width: 10px; height: 10px; border-radius: 50%;
+  width: 14px; height: 14px; border-radius: 50%;
   background: rgba(255,255,255,0.3); cursor: pointer;
   transition: background 0.3s, transform 0.3s;
 }
 .dot.active { background: var(--c-accent); transform: scale(1.3); }
 .dot:hover { background: rgba(255,255,255,0.6); }
-.note { font-size: 0.8rem; opacity: 0.6; margin-top: 0.5rem; font-style: italic; }
+.note { font-size: 1rem; opacity: 0.65; margin-top: 0.4rem; font-style: italic; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -160,160 +162,230 @@ body {
 /* Topbar */
 #topbar {
   position: absolute; top: 0; left: 0; right: 0;
-  height: 52px;
-  background: rgba(10,30,20,0.85);
+  height: 68px;
+  background: rgba(10,30,20,0.9);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 2px solid rgba(255,255,255,0.12);
   display: flex; align-items: center;
-  padding: 0 1rem; gap: 0.8rem;
+  padding: 0 1.5rem; gap: 1rem;
   z-index: 10;
 }
 #topbar .logo {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   color: var(--c-accent);
   white-space: nowrap;
 }
-.scene-btns { display: flex; gap: 0.4rem; flex: 1; justify-content: center; }
+.scene-btns { display: flex; gap: 0.6rem; flex: 1; justify-content: center; }
 .scene-btn {
   background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.18);
   color: var(--c-white);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s;
   white-space: nowrap;
+  font-weight: 500;
 }
 .scene-btn.active { background: rgba(168,216,176,0.25); border-color: var(--c-vivid); color: var(--c-vivid); }
-.scene-btn:hover { background: rgba(255,255,255,0.15); }
+.scene-btn:hover { background: rgba(255,255,255,0.18); }
 .bio-meter {
-  display: flex; align-items: center; gap: 0.6rem;
-  font-size: 0.85rem; white-space: nowrap;
+  display: flex; align-items: center; gap: 0.8rem;
+  font-size: 1rem; white-space: nowrap;
 }
-.bio-meter label { text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; }
+.bio-meter label { text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.9; font-weight: 600; font-size: 0.95rem; }
 .bio-bar-outer {
-  width: 160px; height: 12px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 5px; overflow: hidden;
+  width: 200px; height: 16px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 6px; overflow: hidden;
 }
 .bio-bar-inner {
   height: 100%; width: 100%;
   background: var(--c-vivid);
-  border-radius: 5px;
+  border-radius: 6px;
   transition: width 1s ease, background 1s ease;
 }
-.bio-pct { font-weight: 700; min-width: 40px; text-align: right; transition: color 1s ease; font-size: 0.95rem; }
+.bio-pct { font-weight: 700; min-width: 52px; text-align: right; transition: color 1s ease; font-size: 1.15rem; }
 
 /* Threat card */
 #threat-card {
   position: absolute;
-  top: 80px; left: 50%; transform: translateX(-50%);
-  width: 90%; max-width: 520px;
+  top: 96px; left: 50%; transform: translateX(-50%);
+  width: 90%; max-width: 720px;
   background: var(--c-panel);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 14px;
-  padding: 1.2rem 1.5rem;
+  border-radius: 18px;
+  padding: 1.8rem 2.2rem;
   opacity: 0; pointer-events: none;
   transition: opacity 0.6s ease;
   max-height: 50vh; overflow-y: auto;
 }
 #threat-card.visible { opacity: 1; pointer-events: auto; }
 #threat-card .close-btn {
-  position: absolute; top: 0.6rem; right: 0.8rem;
+  position: absolute; top: 0.8rem; right: 1rem;
   background: none; border: none;
-  color: var(--c-white); font-size: 1.3rem;
+  color: var(--c-white); font-size: 1.6rem;
   cursor: pointer; opacity: 0.6;
 }
 #threat-card .close-btn:hover { opacity: 1; }
 #threat-card h3 {
   font-family: var(--font-display);
-  font-size: 1.15rem;
-  margin-bottom: 0.6rem;
-  padding-right: 1.5rem;
+  font-size: 1.6rem;
+  margin-bottom: 0.8rem;
+  padding-right: 2rem;
+  color: #f2c94c;
 }
-#threat-card .body { font-size: 0.9rem; line-height: 1.55; margin-bottom: 0.6rem; }
+#threat-card .body { font-size: 1.2rem; line-height: 1.6; margin-bottom: 0.8rem; }
 #threat-card .dato {
-  font-size: 0.78rem;
-  opacity: 0.55;
-  font-style: italic;
-  margin-bottom: 0.6rem;
-  line-height: 1.4;
+  font-size: 1.05rem;
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px; padding: 0.7rem 1rem;
+  font-style: normal; opacity: 0.85;
+  margin-bottom: 0.8rem;
+  line-height: 1.5;
 }
 #threat-card .reflexion {
   background: rgba(255,255,255,0.06);
-  border-radius: 8px;
-  padding: 0.7rem 1rem;
-  font-size: 0.9rem;
+  border-radius: 10px;
+  padding: 0.9rem 1.2rem;
+  font-size: 1.15rem;
   color: var(--c-accent);
+  font-weight: 600;
+  line-height: 1.5;
 }
 
-/* Species card */
-#species-card {
-  position: absolute;
-  bottom: 80px; right: 1.5rem;
-  width: 320px; max-width: 85vw;
-  background: var(--c-panel);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 14px;
-  padding: 1.2rem;
+/* Species card — MODAL CENTRADO GRANDE para proyección en aula */
+#species-overlay-bg {
+  position: fixed; inset: 0; z-index: 7500;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(4px);
   opacity: 0; pointer-events: none;
-  transform: translateX(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  max-height: 55vh; overflow-y: auto;
+  transition: opacity 0.4s ease;
+}
+#species-overlay-bg.visible { opacity: 1; pointer-events: auto; }
+
+#species-card {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  width: 92vw; max-width: 1100px;
+  background: linear-gradient(160deg, rgba(10,30,20,0.97) 0%, rgba(5,20,30,0.97) 100%);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(168,216,176,0.25);
+  border-radius: 24px;
+  padding: 2.8rem 3.2rem 2.4rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  max-height: 90vh; overflow-y: auto;
+  z-index: 7600;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 60px rgba(111,207,151,0.08);
 }
 #species-card.visible {
   opacity: 1; pointer-events: auto;
-  transform: translateX(0);
+  transform: translate(-50%, -50%) scale(1);
 }
 #species-card .close-btn {
-  position: absolute; top: 0.6rem; right: 0.8rem;
-  background: none; border: none;
-  color: var(--c-white); font-size: 1.3rem;
-  cursor: pointer; opacity: 0.6;
+  position: absolute; top: 1.2rem; right: 1.5rem;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: var(--c-white); font-size: 1.8rem; width: 48px; height: 48px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0.7;
+  transition: opacity 0.2s, background 0.2s;
+  line-height: 1;
 }
-#species-card .close-btn:hover { opacity: 1; }
+#species-card .close-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+
+#species-card .sp-main-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2.4rem;
+  align-items: start;
+  margin-bottom: 2rem;
+}
+#species-card .sp-thumb {
+  width: 200px; height: 200px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 3px solid rgba(168,216,176,0.35);
+  background: rgba(0,0,0,0.3);
+  display: block;
+}
+#species-card.amenaza .sp-thumb { border-color: rgba(220,80,60,0.45); }
+
+#species-card .sp-info { display: flex; flex-direction: column; gap: 0.6rem; }
 #species-card .sp-header {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 2.6rem;
+  line-height: 1.2;
+  color: var(--c-accent);
   margin-bottom: 0.2rem;
 }
 #species-card .sp-scientific {
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   font-style: italic;
-  opacity: 0.5;
-  margin-bottom: 0.8rem;
-}
-#species-card .sp-desc {
-  font-size: 0.9rem; line-height: 1.55;
+  opacity: 0.55;
   margin-bottom: 0.6rem;
 }
+#species-card .sp-desc {
+  font-size: 1.35rem; line-height: 1.65;
+  margin-bottom: 0.8rem;
+}
 #species-card .sp-role {
-  font-size: 0.85rem; line-height: 1.45;
-  background: rgba(168,216,176,0.08);
-  border-radius: 8px; padding: 0.6rem 0.8rem;
+  font-size: 1.25rem; line-height: 1.55;
+  background: rgba(168,216,176,0.1);
+  border-left: 4px solid var(--c-vivid);
+  border-radius: 0 12px 12px 0; padding: 0.9rem 1.2rem;
 }
 
-/* Miniatura de especie en la tarjeta (Principio de Contigüidad Espacial) */
-#species-card .sp-thumb-wrap {
-  display: flex; align-items: center; gap: 0.9rem;
-  margin-bottom: 0.7rem;
+/* ── QUIZ integrado en la tarjeta ── */
+#species-card .sp-quiz {
+  margin-top: 1.6rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 1.6rem;
 }
-#species-card .sp-thumb {
-  width: 72px; height: 72px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 2px solid rgba(168,216,176,0.25);
-  flex-shrink: 0;
-  background: rgba(0,0,0,0.2);
+#species-card .sp-quiz .quiz-question {
+  font-size: 1.5rem;
+  font-family: var(--font-display);
+  color: #f2c94c;
+  margin-bottom: 1.2rem;
+  line-height: 1.4;
 }
-#species-card .sp-thumb-wrap .sp-header-col {
-  display: flex; flex-direction: column; gap: 0.15rem;
+#species-card .sp-quiz .quiz-options {
+  display: flex; gap: 1rem; flex-wrap: wrap;
 }
-#species-card.amenaza .sp-thumb { border-color: rgba(220,80,60,0.35); }
+#species-card .sp-quiz .quiz-opt {
+  flex: 1; min-width: 200px;
+  background: rgba(255,255,255,0.07);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 14px;
+  padding: 1rem 1.4rem;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  cursor: pointer;
+  text-align: left;
+  color: var(--c-white);
+  transition: all 0.25s ease;
+}
+#species-card .sp-quiz .quiz-opt:hover { background: rgba(168,216,176,0.15); border-color: var(--c-vivid); transform: translateY(-2px); }
+#species-card .sp-quiz .quiz-opt.correct { background: rgba(111,207,151,0.25); border-color: var(--c-vivid); color: #6fcf97; }
+#species-card .sp-quiz .quiz-opt.wrong   { background: rgba(220,80,60,0.2); border-color: #eb5757; color: #eb9797; }
+#species-card .sp-quiz .quiz-opt.disabled { pointer-events: none; opacity: 0.6; }
+#species-card .sp-quiz .quiz-feedback {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-height: 2rem;
+  color: var(--c-vivid);
+  transition: all 0.3s;
+}
+#species-card .sp-quiz .quiz-feedback.wrong { color: #eb5757; }
+
+/* Miniatura (sin uso ya, pero dejada por compatibilidad) */
+#species-card .sp-thumb-wrap { display: none; }
+#species-card .sp-thumb-wrap .sp-header-col { display: none; }
 
 /* Pulso de señalización en sprites no descubiertos (Principio de Señalización) */
 @keyframes speciesPulse {
@@ -448,91 +520,64 @@ a-scene canvas { cursor: crosshair; }
 /* ── RESPONSIVE DESIGN ── */
 
 /* Threat card kids-style tweaks */
-#threat-card h3 { font-size: 1.1rem; color: #f2c94c; }
-#threat-card .dato { font-size: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 0.5rem 0.7rem; font-style: normal; opacity: 0.8; }
-#threat-card .reflexion { font-size: 0.95rem; font-weight: 600; }
-
-/* Species card kids font bump */
-#species-card .sp-header { font-size: 1.25rem; }
-#species-card .sp-desc  { font-size: 0.95rem; line-height: 1.6; }
-#species-card .sp-role  { font-size: 0.9rem;  line-height: 1.55; }
+#threat-card h3 { color: #f2c94c; }
+#threat-card .reflexion { font-weight: 600; }
 
 /* ─── Tablet: 600–900px ─── */
 @media (max-width: 900px) {
-  #topbar .logo { font-size: 0.9rem; }
-  .scene-btn { font-size: 0.72rem; padding: 0.35rem 0.55rem; }
-  .bio-bar-outer { width: 100px; }
-  #species-card { width: 290px; bottom: 70px; }
-  #threat-card { max-width: 440px; }
+  #topbar .logo { font-size: 1.1rem; }
+  .scene-btn { font-size: 0.82rem; padding: 0.4rem 0.65rem; }
+  .bio-bar-outer { width: 130px; }
+  #threat-card { max-width: 560px; }
+  #species-card { padding: 1.8rem 2rem 1.6rem; }
+  #species-card .sp-main-layout { grid-template-columns: 140px 1fr; gap: 1.6rem; }
+  #species-card .sp-thumb { width: 140px; height: 140px; }
+  #species-card .sp-header { font-size: 1.9rem; }
+  #species-card .sp-desc { font-size: 1.1rem; }
+  #species-card .sp-role { font-size: 1rem; }
+  #species-card .sp-quiz .quiz-question { font-size: 1.2rem; }
+  #species-card .sp-quiz .quiz-opt { font-size: 1rem; }
 }
 
 /* ─── Mobile: ≤ 600px ─── */
 @media (max-width: 600px) {
-  /* Topbar: dos filas
-     Fila 1 → logo  +  porcentaje (solo el número)
-     Fila 2 → 4 botones de escena como pestañas completas */
+  /* Topbar compacto */
   #topbar {
-    height: auto;
-    flex-wrap: wrap;
-    padding: 0.35rem 0.6rem 0;
-    gap: 0;
-    align-items: center;
+    height: auto; min-height: 48px;
+    flex-wrap: wrap; padding: 0.4rem 0.6rem; gap: 0.4rem;
   }
-
-  /* Fila 1 izquierda: logo */
-  #topbar .logo {
-    font-size: 0.85rem;
-    flex: 1 1 auto;
-    line-height: 1.8;
-  }
-
-  /* Fila 1 derecha: solo el porcentaje, sin barra ni etiqueta */
-  .bio-meter {
-    gap: 0;
-    align-items: center;
-  }
-  .bio-meter label { display: none; }
-  .bio-bar-outer   { width: 60px; height: 8px; }
-  .bio-pct {
-    font-size: 1rem;
-    font-weight: 700;
-    min-width: auto;
-    color: var(--c-vivid);
-  }
-
-  /* Fila 2: pestañas de escena — sin scroll, repartidas en todo el ancho */
+  #topbar .logo { font-size: 0.85rem; flex: 1 1 auto; }
   .scene-btns {
-    order: 3;
-    width: 100%;
-    overflow-x: visible;
-    justify-content: stretch;
-    padding: 0.3rem 0 0.35rem;
-    gap: 0.25rem;
+    order: 3; width: 100%;
+    overflow-x: auto; justify-content: flex-start;
+    padding-bottom: 2px; gap: 0.3rem;
+    scrollbar-width: none;
   }
-  .scene-btn {
-    flex: 1;
-    font-size: 0.68rem;
-    padding: 0.35rem 0.15rem;
-    white-space: nowrap;
-    flex-shrink: 1;
-    text-align: center;
-  }
+  .scene-btns::-webkit-scrollbar { display: none; }
+  .scene-btn { font-size: 0.7rem; padding: 0.3rem 0.5rem; white-space: nowrap; flex-shrink: 0; }
+  .bio-meter { gap: 0.35rem; }
+  .bio-meter label { display: none; }
+  .bio-bar-outer { width: 70px; height: 10px; }
+  .bio-pct { font-size: 0.85rem; min-width: 32px; }
 
-  /* Tarjeta de especies — hoja desde abajo, sobre los botones */
+  /* Tarjeta de especies — modal simplificado en móvil */
   #species-card {
-    bottom: 64px; right: 0; left: 0;
-    width: 100%; max-width: 100%;
-    border-radius: 18px 18px 0 0;
-    transform: translateY(20px);
-    max-height: 52vh;
-    padding: 1rem 1.1rem 1rem;
+    width: 96vw;
+    padding: 1.2rem 1.1rem;
+    max-height: 88vh;
   }
-  #species-card.visible { transform: translateY(0); }
-  #species-card .sp-header { font-size: 1.15rem; }
-  #species-card .sp-desc { font-size: 0.88rem; }
-  #species-card .sp-role { font-size: 0.83rem; }
+  #species-card .sp-main-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  #species-card .sp-thumb { width: 100%; height: 160px; border-radius: 12px; }
+  #species-card .sp-header { font-size: 1.5rem; }
+  #species-card .sp-desc { font-size: 0.95rem; }
+  #species-card .sp-role { font-size: 0.9rem; }
+  #species-card .sp-quiz .quiz-question { font-size: 1rem; }
+  #species-card .sp-quiz .quiz-opt { font-size: 0.9rem; min-width: 100%; }
 
-  /* Tarjeta de amenaza — también sobre los botones */
+  /* Tarjeta de amenaza */
   #threat-card {
     top: auto; bottom: 64px;
     left: 0; right: 0;
@@ -571,16 +616,16 @@ a-scene canvas { cursor: crosshair; }
   #pretraining { padding: 1rem; }
   .slide-container { min-height: auto; }
   .slide { gap: 0.9rem; }
-  .slide h2 { font-size: 1.4rem; }
-  .slide p { font-size: 0.95rem; }
+  .slide h2 { font-size: 1.6rem; }
+  .slide p { font-size: 1rem; }
   .card-row { gap: 0.6rem; }
   .sound-card { min-width: 140px; max-width: none; flex: 1 1 140px; padding: 0.9rem; }
-  .sound-card p { font-size: 0.8rem; }
+  .sound-card p { font-size: 0.85rem; }
   .scene-grid { grid-template-columns: 1fr; gap: 0.5rem; }
-  .scene-card h4 { font-size: 0.9rem; }
-  .scene-card p { font-size: 0.78rem; }
-  .btn-primary { font-size: 1rem; padding: 0.7rem 1.5rem; }
-  .btn-secondary { font-size: 0.85rem; padding: 0.45rem 1rem; }
+  .scene-card h4 { font-size: 0.95rem; }
+  .scene-card p { font-size: 0.82rem; }
+  .btn-primary { font-size: 1.05rem; padding: 0.8rem 1.6rem; }
+  .btn-secondary { font-size: 0.9rem; padding: 0.5rem 1rem; }
   .slide-buttons { gap: 0.7rem; }
   .dots { margin-top: 1rem; }
 }
@@ -597,45 +642,76 @@ a-scene canvas { cursor: crosshair; }
 <!-- Pretraining -->
 <div id="pretraining">
   <div class="slide-container">
-    <!-- Slide 0 -->
+    <!-- Slide 0: Bienvenida -->
     <div class="slide active" data-slide="0">
-      <h2>¡Bienvenido a las Ciénegas de Lerma! 🌿</h2>
-      <p>Un humedal es como un gran vecindario donde viven miles de animales. En este recorrido vas a <strong>escuchar</strong> cómo suena la ciénega cuando está sana… y cómo cambia cuando los humanos la lastiman.</p>
-      <p style="font-size:0.9rem;opacity:0.75">Mueve la pantalla para explorar a tu alrededor. Haz clic en los animales para conocerlos. 🖱️</p>
+      <h2>¡Bienvenidos a las Ciénegas de Lerma! 🌿</h2>
+      <p>Un humedal es como un gran vecindario lleno de vida. En este recorrido vas a <strong>escuchar y explorar</strong> cómo suena la ciénega cuando está sana… y cómo cambia cuando las personas la lastiman.</p>
+      <p style="font-size:1.1rem;opacity:0.75">👨‍🏫 El maestro moverá la pantalla para explorar. ¡Observen con atención!</p>
       <div class="slide-buttons">
         <button class="btn-primary" onclick="nextSlide(1)">¡Siguiente! →</button>
       </div>
     </div>
-    <!-- Slide 1 -->
+
+    <!-- Slide 1: Paisaje Sonoro -->
     <div class="slide" data-slide="1">
-      <h2>¿Qué sonidos hay en la ciénega? 👂</h2>
+      <h2>🎵 ¿Qué es un Paisaje Sonoro?</h2>
+      <p>Al igual que los paisajes que vemos con los ojos, también existen <strong>paisajes que escuchamos</strong>. Todos los sonidos de un lugar juntos forman su <em>paisaje sonoro</em>.</p>
       <div class="card-row">
         <div class="sound-card">
           <div class="emoji">🐦</div>
-          <h4>Sonidos de animales</h4>
-          <p>Cantos de pájaros, croar de ranas, el cascabel de una serpiente. ¡Los científicos le llaman <em>Biofonía</em>!</p>
+          <h4>Biofonía</h4>
+          <p>Sonidos de los seres vivos: cantos de pájaros, croar de ranas, el cascabel de una serpiente.</p>
         </div>
         <div class="sound-card">
           <div class="emoji">🌊</div>
-          <h4>Sonidos de la naturaleza</h4>
-          <p>El viento moviendo los tulares, la lluvia, el agua corriendo. Se llama <em>Geofonía</em>.</p>
+          <h4>Geofonía</h4>
+          <p>Sonidos de la naturaleza: el viento entre los tulares, la lluvia, el agua corriendo.</p>
         </div>
         <div class="sound-card">
           <div class="emoji">🏗️</div>
-          <h4>Sonidos de las personas</h4>
-          <p>Carros, fábricas, música, motores. Se llama <em>Antropofonía</em>.</p>
+          <h4>Antropofonía</h4>
+          <p>Sonidos de las personas: carros, fábricas, música, motores.</p>
         </div>
       </div>
-      <p class="note">⬆️ El Biofómetro te dice cuántos sonidos de animales hay. ¡A mayor número, más sana está la ciénega!</p>
+      <p class="note">💡 Cuando un lugar tiene mucha biofonía, significa que está <strong>muy sano y lleno de vida</strong>.</p>
       <div class="slide-buttons">
         <button class="btn-secondary" onclick="nextSlide(0)">← Anterior</button>
         <button class="btn-primary" onclick="nextSlide(2)">Siguiente →</button>
       </div>
     </div>
-    <!-- Slide 2 -->
+
+    <!-- Slide 2: El Biofómetro -->
     <div class="slide" data-slide="2">
+      <h2>📊 El Biofómetro</h2>
+      <p>En la parte de arriba de la pantalla verán una barra especial que se llama <strong>Biofómetro</strong>. ¡Es como el termómetro de la ciénega!</p>
+      <div class="card-row">
+        <div class="sound-card" style="border-color:rgba(111,207,151,0.4)">
+          <div class="emoji">🟢</div>
+          <h4 style="color:#6fcf97">100% — Muy sana</h4>
+          <p>Muchos animales cantando. ¡El humedal está en perfecto estado!</p>
+        </div>
+        <div class="sound-card" style="border-color:rgba(242,201,76,0.4)">
+          <div class="emoji">🟡</div>
+          <h4 style="color:#f2c94c">53% — Con problemas</h4>
+          <p>Varios animales se fueron. Algo está dañando el humedal.</p>
+        </div>
+        <div class="sound-card" style="border-color:rgba(235,87,87,0.4)">
+          <div class="emoji">🔴</div>
+          <h4 style="color:#eb5757">10% — Muy dañada</h4>
+          <p>Casi no hay animales. La ciénega está en peligro.</p>
+        </div>
+      </div>
+      <p class="note">🔬 Los científicos usan el paisaje sonoro para medir la salud de los ecosistemas. ¡Nosotros haremos lo mismo hoy!</p>
+      <div class="slide-buttons">
+        <button class="btn-secondary" onclick="nextSlide(1)">← Anterior</button>
+        <button class="btn-primary" onclick="nextSlide(3)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 3: Las 4 escenas -->
+    <div class="slide" data-slide="3">
       <h2>Vas a explorar 4 escenas 🗺️</h2>
-      <p>Es la misma ciénega, pero en cuatro momentos diferentes. ¡Escucha cómo cambian los sonidos!</p>
+      <p>Es la misma ciénega, pero en cuatro momentos diferentes. ¡Fíjate cómo cambian los sonidos y cuántos animales hay!</p>
       <div class="scene-grid">
         <div class="scene-card" style="background:rgba(111,207,151,0.15)">
           <h4>🟢 1 — La ciénega viva</h4>
@@ -647,7 +723,7 @@ a-scene canvas { cursor: crosshair; }
         </div>
         <div class="scene-card" style="background:rgba(242,153,74,0.15)">
           <h4>🟠 3 — La descarga</h4>
-          <p>El agua está sucia y contaminada. Pocos animales pueden vivir en estas condiciones.</p>
+          <p>El agua está sucia y contaminada. Pocos animales pueden vivir así.</p>
         </div>
         <div class="scene-card" style="background:rgba(235,87,87,0.15)">
           <h4>🔴 4 — La orilla urbanizada</h4>
@@ -655,41 +731,43 @@ a-scene canvas { cursor: crosshair; }
         </div>
       </div>
       <div class="slide-buttons">
-        <button class="btn-secondary" onclick="nextSlide(1)">← Anterior</button>
-        <button class="btn-primary" onclick="nextSlide(3)">Siguiente →</button>
-      </div>
-    </div>
-    <!-- Slide 3 — Cuaderno de campo -->
-    <div class="slide" data-slide="3">
-      <h2>Tu cuaderno de campo 📓</h2>
-      <div class="card-row">
-        <div class="sound-card" style="text-align:left; max-width:320px;">
-          <div class="emoji" style="text-align:center">📓</div>
-          <h4 style="text-align:center; margin-bottom:0.7rem">¿Qué es el cuaderno?</h4>
-          <p>Los científicos que estudian la naturaleza anotan todo lo que descubren. ¡Tú también puedes hacerlo!</p>
-          <p style="margin-top:0.6rem">Cada vez que hagas clic en un animal nuevo, se guardará automáticamente en tu cuaderno de campo con su nombre y función. 🐦</p>
-        </div>
-        <div class="sound-card" style="text-align:left; max-width:320px;">
-          <div class="emoji" style="text-align:center">📍</div>
-          <h4 style="text-align:center; margin-bottom:0.7rem">¿Cómo abrirlo?</h4>
-          <p>Busca el botón <strong>📓</strong> en la esquina inferior izquierda de la pantalla.</p>
-          <p style="margin-top:0.6rem">¡Intenta encontrar todos los animales! Hay <strong>15 en la primera escena</strong> y más en las siguientes. 🔍</p>
-        </div>
-      </div>
-      <p class="note">💡 En tu cuaderno también puedes escribir tus propias observaciones como un científico de verdad.</p>
-      <div class="slide-buttons">
         <button class="btn-secondary" onclick="nextSlide(2)">← Anterior</button>
         <button class="btn-primary" onclick="nextSlide(4)">Siguiente →</button>
       </div>
     </div>
-    <!-- Slide 4 -->
+
+    <!-- Slide 4: Cuaderno -->
     <div class="slide" data-slide="4">
-      <h2>¡A buscar animales! 🔍</h2>
-      <p>En la primera escena hay <strong>15 animales escondidos</strong>. Mueve la pantalla para explorar a tu alrededor y haz clic sobre ellos para conocerlos.</p>
-      <p>Cuando encuentres uno, escucharás su sonido y aprenderás qué hace en la ciénega. 🎵</p>
-      <p class="species-line">🐦 12 aves • 🐸 2 ranas • 🐍 1 serpiente</p>
+      <h2>Tu cuaderno de campo 📓</h2>
+      <div class="card-row">
+        <div class="sound-card" style="text-align:left; max-width:340px;">
+          <div class="emoji" style="text-align:center">📓</div>
+          <h4 style="text-align:center; margin-bottom:0.7rem">¿Qué es el cuaderno?</h4>
+          <p>Los científicos anotan todo lo que descubren en la naturaleza. ¡Tú también puedes hacerlo como un biólogo de verdad!</p>
+          <p style="margin-top:0.8rem">Cada vez que el maestro haga clic en un animal, aparecerá en el cuaderno con su nombre y función. 🐦</p>
+        </div>
+        <div class="sound-card" style="text-align:left; max-width:340px;">
+          <div class="emoji" style="text-align:center">🔍</div>
+          <h4 style="text-align:center; margin-bottom:0.7rem">¿Cómo jugar?</h4>
+          <p>Al hacer clic en un animal, verán su información <strong>en el centro de la pantalla</strong> y habrá una pregunta para toda la clase.</p>
+          <p style="margin-top:0.8rem">¡Intenten encontrar todos los animales! Hay <strong>15 en la primera escena</strong> y más en las siguientes. 🌿</p>
+        </div>
+      </div>
+      <p class="note">💡 En el cuaderno también pueden escribir sus propias observaciones como científicos de verdad.</p>
       <div class="slide-buttons">
         <button class="btn-secondary" onclick="nextSlide(3)">← Anterior</button>
+        <button class="btn-primary" onclick="nextSlide(5)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Slide 5: ¡A explorar! -->
+    <div class="slide" data-slide="5">
+      <h2>¡Listos para explorar! 🔍</h2>
+      <p>En la primera escena hay <strong>15 animales escondidos</strong>. El maestro moverá la pantalla para buscarlos.</p>
+      <p>Cuando encuentren uno, escucharán su sonido y podrán responder una pregunta sobre él. ¡Presten atención! 🎵</p>
+      <p class="species-line">🐦 12 aves • 🐸 2 ranas • 🐍 1 serpiente</p>
+      <div class="slide-buttons">
+        <button class="btn-secondary" onclick="nextSlide(4)">← Anterior</button>
         <button class="btn-primary" onclick="enterExperience()">🌿 ¡Entrar a la ciénega!</button>
       </div>
     </div>
@@ -700,6 +778,7 @@ a-scene canvas { cursor: crosshair; }
     <span class="dot" onclick="goToSlide(2)"></span>
     <span class="dot" onclick="goToSlide(3)"></span>
     <span class="dot" onclick="goToSlide(4)"></span>
+    <span class="dot" onclick="goToSlide(5)"></span>
   </div>
 </div>
 
@@ -738,18 +817,31 @@ a-scene canvas { cursor: crosshair; }
     <p class="reflexion" id="threat-reflexion"></p>
   </div>
 
-  <!-- Species card -->
+  <!-- Species overlay background -->
+  <div id="species-overlay-bg" onclick="closeSpeciesCard()"></div>
+
+  <!-- Species card — modal centrado para proyección -->
   <div id="species-card">
     <button class="close-btn" onclick="closeSpeciesCard()">✕</button>
-    <div class="sp-thumb-wrap">
+    <div class="sp-main-layout">
       <img class="sp-thumb" id="sp-thumb" src="" alt="">
-      <div class="sp-header-col">
+      <div class="sp-info">
         <div class="sp-header" id="sp-header"></div>
         <div class="sp-scientific" id="sp-scientific"></div>
+        <p class="sp-desc" id="sp-desc"></p>
+        <p class="sp-role" id="sp-role"></p>
       </div>
     </div>
-    <p class="sp-desc" id="sp-desc"></p>
-    <p class="sp-role" id="sp-role"></p>
+    <!-- Pregunta integrada -->
+    <div class="sp-quiz" id="sp-quiz">
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+    </div>
+    <!-- Wrapper invisible para compatibilidad con JS previo -->
+    <div class="sp-thumb-wrap" style="display:none">
+      <div class="sp-header-col"></div>
+    </div>
   </div>
 
   <!-- Pulsos de señalización (Principio de Señalización) -->
@@ -900,6 +992,11 @@ const DESCRIPTORES = {
     desc: "¡El animal más veloz del mundo! 💨 En picada puede ir a más de 300 km/h, mucho más rápido que un coche en autopista. Visita la ciénega para cazar.",
     role: "Caza pájaros en pleno vuelo. Su presencia significa que hay muchísima vida en la ciénega. 🌟"
   },
+  "Elanoides forficatus": {
+    emoji: "🦅",
+    desc: "¡Esta ave vuela como un avión acrobático! ✈️ Su cola larga, partida en forma de tijera, le permite girar y dar vueltas en el aire para atrapar insectos, lagartijas y ranitas sin dejar de volar ni un segundo.",
+    role: "Al cazar insectos y pequeños reptiles en pleno vuelo, ayuda a mantener el equilibrio de la ciénega. Si está aquí, significa que hay suficiente comida volando sobre el humedal. 🦋"
+  },
   "Geothlypis speciosa": {
     emoji: "🐦",
     desc: "La Mascarita es uno de los pájaros más raros de México. 🌟 Solo vive en unos pocos humedales del centro del país. ¡Quizás seas de las pocas personas en el mundo que la escucha hoy!",
@@ -914,6 +1011,11 @@ const DESCRIPTORES = {
     emoji: "🐦",
     desc: "Este gorrión es más resistente que otros pájaros — puede vivir en lugares donde ya hay algo de contaminación. Cuando hay muchos gorriones, puede ser una señal de alerta. 😮",
     role: "Come semillas e insectos. Cuando domina sobre otras aves más especiales, nos avisa que la ciénega está en peligro. ⚠️"
+  },
+  "Passerculus sandwichensis": {
+    emoji: "🐦",
+    desc: "Cada invierno llegan volando desde Canadá y Estados Unidos miles de Gorriones Sabaneros que buscan un lugar cálido para pasar la temporada fría. ✈️🍂 Se mueven en grupos por los pastos bajitos cerca del agua.",
+    role: "Comen semillas e insectos pequeños y son alimento para halcones y búhos. Si encuentran suficiente comida en la ciénega, podrán regresar fuertes al norte para tener crías. 🌎"
   },
   "Rallus elegans tenuirostris": {
     emoji: "🐦",
@@ -1295,6 +1397,12 @@ function createSpeciesEntities() {
     entity.addEventListener('mouseenter', () => {
       const escenas = sp.escenas || [0];
       if (!escenas.includes(currentScene)) return;
+      // Solo mostrar al hacer clic, no solo al pasar el cursor
+      // (mantener hover para compatibilidad con touch)
+    });
+    entity.addEventListener('click', () => {
+      const escenas = sp.escenas || [0];
+      if (!escenas.includes(currentScene)) return;
       isHoveringSpecies = true;
       // Fade out suave de las capas activas de especies
       ['aves', 'anfibios', 'reptiles'].forEach(g => {
@@ -1305,10 +1413,13 @@ function createSpeciesEntities() {
       showSpecies(sp.id);
     });
     entity.addEventListener('mouseleave', () => {
-      isHoveringSpecies = false;
-      closeSpeciesCard();   // closeSpeciesCard ya reanuda currentAmbient
-      stopSpeciesAudio();
-      resumeAllAmbientSpecies();
+      // Solo pausar audio al salir si la tarjeta no está visible
+      const card = document.getElementById('species-card');
+      if (!card.classList.contains('visible')) {
+        isHoveringSpecies = false;
+        stopSpeciesAudio();
+        resumeAllAmbientSpecies();
+      }
     });
     container.appendChild(entity);
   });
@@ -1437,6 +1548,31 @@ function updateReturnButton(n) {
   btn.classList.toggle('visible', n !== 0);
 }
 
+// ── Banco de preguntas por especie ──
+const PREGUNTAS = {
+  "Anas diazi":           { q: "¿Cómo ayuda el Pato mexicano a que crezcan nuevas plantas?", a: 1, opts: ["Construyendo nidos en el lodo", "Al comer plantas suelta semillas que hacen crecer nuevos tulares", "Limpiando el agua con su pico"] },
+  "Botaurus lentiginosus":{ q: "¿Qué nos dice encontrar un Avetoro en la ciénega?", a: 0, opts: ["Que los tulares están muy sanos y nadie los ha destruido", "Que el agua está contaminada", "Que hay demasiados ratones"] },
+  "Bubo virginianus mayensis": { q: "¿Cuál es la función ecológica del Búho Grande en la ciénega?", a: 2, opts: ["Para ahuyentar a los visitantes", "Para cantar muy fuerte de noche", "Para comer ratones y evitar que haya demasiados"] },
+  "Buteo albicaudatus":   { q: "¿Qué pasaría si no hubiera águilas en la ciénega?", a: 1, opts: ["Habría más peces en el agua", "Los ratones se multiplicarían y dañarían plantas y animales", "Las ranas cantarían más fuerte"] },
+  "Buteo swainsoni":      { q: "¿Por qué es importante que la ciénega esté sana para el Halcón de Swainson?", a: 2, opts: ["Porque aquí nació y nunca se va", "Porque come peces en el agua", "Porque la usa como parada en su largo viaje de miles de kilómetros"] },
+  "Falco peregrinus":     { q: "¿Qué significa que el Halcón Peregrino visite la ciénega?", a: 0, opts: ["Que hay muchísima vida y biodiversidad en ese lugar", "Que el agua está muy fría", "Que hay muchas serpientes"] },
+  "Elanoides forficatus": { q: "¿Qué hace especial al Elanio tijereta cuando caza?", a: 0, opts: ["Atrapa insectos y pequeños animales sin dejar de volar, gracias a su cola en forma de tijera", "Espera escondido bajo el agua hasta que pasa su presa", "Solo come semillas que encuentra en el suelo"] },
+  "Geothlypis speciosa":  { q: "¿Por qué la Mascarita del Lerma es tan especial?", a: 1, opts: ["Porque es la más grande de México", "Porque solo vive en unos pocos humedales de México y es muy difícil de encontrar", "Porque puede bucear bajo el agua"] },
+  "Botaurus exilis":      { q: "¿Dónde vive la garza más pequeña de América?", a: 2, opts: ["En las copas de los árboles más altos", "En el fondo del agua", "Escondida entre las plantas acuáticas de la ciénega"] },
+  "Passerculus sandwichensis sanctorum": { q: "¿Qué nos avisa el gorrión cuando hay muchos en la ciénega?", a: 0, opts: ["Que la ciénega podría estar en peligro porque otras aves más delicadas ya se fueron", "Que hay mucha comida para todos", "Que va a llover pronto"] },
+  "Passerculus sandwichensis": { q: "¿Por qué los Gorriones Sabaneros visitan la ciénega en invierno?", a: 0, opts: ["Porque vienen desde el norte escapando del frío y buscan comida y refugio", "Porque nacieron ahí y nunca se van", "Porque solo pueden volar de noche"] },
+  "Rallus elegans tenuirostris": { q: "¿Qué significa escuchar el grito del Rascón real?", a: 1, opts: ["Que hay contaminación en el agua", "Que todavía existen zonas muy sanas en la ciénega", "Que hay pocos insectos"] },
+  "Rallus limicola":      { q: "¿Qué condición necesita el Rascón limícola para vivir?", a: 2, opts: ["Agua muy caliente", "Áreas sin plantas alrededor", "Muchos tulares y vegetación en buen estado"] },
+  "Tachybaptus dominicus":{ q: "¿Por qué el Zambullidor es como un indicador de la salud del agua?", a: 0, opts: ["Porque es uno de los primeros animales en irse cuando el agua se contamina", "Porque come agua sucia y la limpia", "Porque solo aparece en invierno"] },
+  "Lithobates montezumae":{ q: "¿Qué servicio hace la Rana de Moctezuma para las personas?", a: 1, opts: ["Canta para ahuyentar a las culebras", "Come insectos y mosquitos, evitando que haya demasiados", "Filtra el agua para que sea limpia"] },
+  "Dryophytes plicatus":  { q: "¿Qué tiene de especial la ranita trepadora?", a: 2, opts: ["Puede respirar bajo el agua mucho tiempo", "Es la rana más grande de la ciénega", "Puede trepar plantas usando sus dedos como ventosas"] },
+  "Crotalus transversus": { q: "¿Cuál es la función ecológica de la víbora de cascabel en la ciénega?", a: 0, opts: ["Para controlar la población de ratones que podrían dañar otras especies", "Para asustar a los visitantes y proteger el humedal", "Para limpiar el agua con su veneno"] },
+  // Amenazas
+  "Vaca":    { q: "¿Cómo dañan las vacas los tulares de la ciénega?", a: 1, opts: ["Comiéndose a los pájaros", "Al pisarlos los aplastan y destruyen, quitando la casa a muchos animales", "Bebiendo toda el agua del humedal"] },
+  "Fábrica": { q: "¿Cómo viajan los venenos de una fábrica por la cadena alimentaria?", a: 2, opts: ["Por el viento a los árboles", "Por el suelo a las raíces de las plantas", "Del agua a los insectos, de los insectos a los peces, y de los peces a las garzas"] },
+  "Casa":    { q: "¿Por qué construir casas sobre el humedal es un problema?", a: 0, opts: ["Porque el suelo se vuelve duro y el agua ya no puede pasar, destruyendo el hábitat para siempre", "Porque hace más calor y los animales se van", "Porque las luces de las casas deslumbran a los animales"] }
+};
+
 function showSpecies(id) {
   const sp = ALL_SPECIES.find(s => s.id === id);
   if (!sp) return;
@@ -1455,8 +1591,9 @@ function showSpecies(id) {
   }
 
   const card = document.getElementById('species-card');
+  const overlayBg = document.getElementById('species-overlay-bg');
 
-  // ── Principio de Contigüidad Espacial: miniatura junto al nombre ──
+  // ── Imagen grande ──
   const thumb = document.getElementById('sp-thumb');
   thumb.src = sp.imagen || '';
   thumb.alt = sp.nombre;
@@ -1471,18 +1608,63 @@ function showSpecies(id) {
   } else {
     document.getElementById('sp-scientific').textContent = sp.cientifico || '';
     document.getElementById('sp-desc').textContent = sp.desc;
-    document.getElementById('sp-role').innerHTML = '🔗 <strong>¿Para qué sirve?</strong><br>' + sp.role;
+    document.getElementById('sp-role').innerHTML = '🔗 <strong>¿Cuál es su función ecológica?</strong><br>' + sp.role;
     card.classList.remove('amenaza');
   }
 
+  // ── Pregunta ──
+  const key = sp.esAmenaza ? sp.nombre : sp.cientifico;
+  const pData = PREGUNTAS[key];
+  const quizEl = document.getElementById('sp-quiz');
+  if (pData) {
+    document.getElementById('quiz-question').textContent = '🤔 ' + pData.q;
+    document.getElementById('quiz-feedback').textContent = '';
+    document.getElementById('quiz-feedback').className = 'quiz-feedback';
+    const optsEl = document.getElementById('quiz-options');
+    optsEl.innerHTML = '';
+    pData.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = ['A) ', 'B) ', 'C) '][i] + opt;
+      btn.onclick = () => answerQuiz(i, pData.a, optsEl);
+      optsEl.appendChild(btn);
+    });
+    quizEl.style.display = 'block';
+  } else {
+    quizEl.style.display = 'none';
+  }
+
+  overlayBg.classList.add('visible');
   card.classList.add('visible');
+}
+
+function answerQuiz(selected, correct, optsEl) {
+  const btns = optsEl.querySelectorAll('.quiz-opt');
+  btns.forEach((b, i) => {
+    b.classList.add('disabled');
+    if (i === correct) b.classList.add('correct');
+    else if (i === selected) b.classList.add('wrong');
+  });
+  const feedbackEl = document.getElementById('quiz-feedback');
+  if (selected === correct) {
+    feedbackEl.textContent = '✅ ¡Correcto! ¡Muy bien!';
+    feedbackEl.className = 'quiz-feedback';
+  } else {
+    feedbackEl.textContent = '❌ Esa no era. Observen la respuesta correcta en verde.';
+    feedbackEl.className = 'quiz-feedback wrong';
+  }
 }
 
 function closeSpeciesCard() {
   const card = document.getElementById('species-card');
+  const overlayBg = document.getElementById('species-overlay-bg');
   card.classList.remove('visible', 'amenaza');
+  overlayBg.classList.remove('visible');
+  isHoveringSpecies = false;
+  stopSpeciesAudio();
+  resumeAllAmbientSpecies();
   // ── Principio de Coherencia: reanudar ambiente al cerrar la tarjeta ──
-  if (currentAmbient && !isHoveringSpecies) currentAmbient.play().catch(() => {});
+  if (currentAmbient) currentAmbient.play().catch(() => {});
 }
 
 function showDiscoveryFlash(sp) {
